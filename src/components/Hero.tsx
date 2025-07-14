@@ -1,77 +1,57 @@
-"use client"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import LogosSection from "./astro/LogosSection"
-const menuItems = [
-    { name: "Features", href: "#" },
-    { name: "Solution", href: "#" },
-    { name: "Pricing", href: "#" },
-    { name: "About", href: "#" },
-]
 
-export default function HeroSection() {
+
+export default function HeroSection({ slides }: { slides: any[] }) {
     const [menuState, setMenuState] = useState(false)
     const [currentSlide, setCurrentSlide] = useState(0)
     const [show, setShow] = useState(true)
 
 
-    const content = [
-        {
-            title: `Plan estrategico Santiago 2030 "Actualizacion" `,
-            description: `El Plan Estratégico de Santiago 2030 Actualizado es la Agenda Oficial de Proyectos y Desarrollo de esta ciudad y el municipio, propone el logro de un futuro deseable para Santiago, contemplando proyectos estructurantes y productos entregables conducentes a mejorar la calidad de vida de los ciudadanos.`
-        },
-        {
-            title: `Consejo para el Desarrollo Estratégico de Santiago`,
-            description: `Planificamos y articulamos proyectos que aseguran el desarrollo sostenible de Santiago y su entorno metropolitano..`
-        }
-    ]
 
-    const backgroundImages = [
-        "https://i0.wp.com/cdes.do/wp-content/uploads/2020/02/Fernando-German-Elevado-Estrella-Sadhala-scaled.jpg?fit=2560%2C1705&ssl=1",
-        "https://i0.wp.com/cdes.do/wp-content/uploads/2020/04/Foto-Puente-Fernando-Germain-min-scaled.jpg?fit=2560%2C1705&ssl=1",
-    ]
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % backgroundImages.length)
+            setCurrentSlide((prev) => (prev + 1) % slides.length)
         }, 5000) // Change slide every 5 seconds
 
         const showinterval = setInterval(() => {
             setShow((prev) => !prev)
         }, 4000) // Change slide every 10 seconds
         return () => { clearInterval(interval); clearInterval(showinterval) }
-    }, [backgroundImages.length])
+    }, [slides.length])
     return (
         <>
             <main>
-                <section className="overflow-hidden h-200">
-                    <div className="relative mx-auto max-w-screen px-6 py-28 lg:py-20">
+                <section className="overflow-hidden">
+                    <div className="relative mx-auto max-w-screen px-6 py-24 lg:py-14">
                         <div className="lg:flex lg:items-center lg:gap-12">
-                            <div className="relative z-10 mx-auto max-w-xl text-center lg:ml-0 lg:w-1/2 lg:text-left space-y-6">
+                            <div className="h-2xl relative z-10 mx-auto max-w-xl text-center lg:ml-0 lg:w-1/2 lg:text-left space-y-6">
                                 <AnimatePresence mode="wait"> {/* Use mode="wait" to ensure one animation completes before the next starts */}
                                     <motion.h1
-                                        key={content[currentSlide]?.title}
-                                        className="text-balance text-4xl font-bold md:text-5xl xl:text-5xl"
+                                        key={slides[currentSlide]?.Contenido}
+                                        className="text-balance h-[144px] text-4xl font-bold md:text-5xl xl:text-5xl"
                                         initial={{ opacity: 0, }} // Start slightly below and invisible
                                         animate={{ opacity: 1, }} // Slide up and fade in
                                         exit={{ opacity: 0, }} // Slide up and fade out
                                         transition={{ duration: 0.7, ease: "easeIn" }} // Adjust duration and easing
                                     >
-                                        {content[currentSlide]?.title}
+                                        {slides[currentSlide]?.Contenido}
                                     </motion.h1>
                                 </AnimatePresence>
                                 <AnimatePresence mode="wait">
 
                                     <motion.p
-                                        key={content[currentSlide]?.description}
-                                        className="text-base leading-relaxed"
-                                        initial={{ opacity: 0,  }}
-                                        animate={{ opacity: 1,  }}
+                                        key={slides[currentSlide]?.Subtitulo}
+                                        className="h-[168px] text-base leading-relaxed"
+                                        initial={{ opacity: 0, }}
+                                        animate={{ opacity: 1, }}
                                         exit={{ opacity: 0, }}
                                         transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }} // Add a slight delay for the description
                                     >
-                                        {content[currentSlide]?.description}
+                                        {slides[currentSlide]?.Subtitulo}
                                     </motion.p>
                                 </AnimatePresence>
                                 <AnimatePresence mode="wait">
@@ -81,14 +61,14 @@ export default function HeroSection() {
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.5, delay: 0.2 }}
-                                        className="h-12 flex items-center"
+                                        className="h-12 flex items-center justify-center lg:justify-start"
                                     >
-                                        <a 
-                                            href={currentSlide === 0 ? "/plan-estrategico-de-santiago" : "/nosotros"}
+                                        <a
+                                            href={slides[currentSlide].Enlace.Url}
                                             className="cursor-pointer"
                                         >
-                                            <Button className="cursor-pointer">
-                                                {currentSlide === 0 ? "Conocer Plan Estratégico" : "Acerca de Nosotros"}
+                                            <Button className="cursor-pointer" >
+                                                { slides[currentSlide]?.Enlace.Contenido}
                                             </Button>
                                         </a>
                                     </motion.div>
@@ -106,15 +86,15 @@ export default function HeroSection() {
                                     className="flex transition-transform duration-1000 ease-in-out"
                                     style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                                 >
-                                    {backgroundImages.map((image, index) => (
+                                    {slides.map((image, index) => (
                                         <div key={index} className="w-full flex-shrink-0">
                                             <img
-                                                src={image || "/placeholder.svg"}
+                                                src={import.meta.env.PUBLIC_STRAPI_URL + image.Fondo.url}
                                                 alt={`Background slide ${index + 1}`}
                                                 width={2796}
                                                 height={2008}
                                                 className="w-full h-full object-cover"
-                                              
+
                                             />
                                         </div>
                                     ))}

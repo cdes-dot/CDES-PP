@@ -1,8 +1,33 @@
 
 import { ProgressiveBlur } from "@/components/ui/progressive-blur";
 import { InfiniteSlider } from "@/components/ui/infinite-slider";
+import { useEffect, useState } from "react";
 
 export default function LogosSection() {
+
+    const [logos, setLogos] = useState([])
+    useEffect(() => {
+        const fetchLogos = async () => {
+            const request = await fetch(`${import.meta.env.PUBLIC_STRAPI_URL}/api/aliados?populate[institucion][populate]=*`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`
+                }
+            })
+            const data = await request.json()
+            return data
+        }
+
+        fetchLogos().then((data) => {
+            if (data) {
+                setLogos(data.data)
+            } else {
+                throw new Error("No data found")
+            }
+        }).catch((error) => {
+            console.error("Error fetching logos:", error);
+        })
+    }, [])
     return (
         <section className="bg-background pb-16 md:pb-32">
             <div className="group relative m-auto">
@@ -14,80 +39,19 @@ export default function LogosSection() {
                     </div>
                     <div className="relative py-6 md:w-[calc(100%-11rem)]">
                         <InfiniteSlider speedOnHover={20} speed={40} gap={112}>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto size-12 w-fit dark:invert"
-                                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Japan_International_Cooperation_Agency_logo.svg/1269px-Japan_International_Cooperation_Agency_logo.svg.png"
-                                    alt="Nvidia Logo"
-                                    height="40"
-                                    width="auto"
-                                />
-                            </div>
-
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-8 w-fit dark:invert"
-                                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/USAID-Identity.svg/2560px-USAID-Identity.svg.png"
-                                    alt="Column Logo"
-                                    height="32"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-8 w-fit dark:invert"
-                                    src="https://www.clipartmax.com/png/middle/145-1454872_idb-logo-colour-inter-american-development-bank.png"
-                                    alt="GitHub Logo"
-                                    height="32"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/AECID_logo.svg/1200px-AECID_logo.svg.png"
-                                    alt="Nike Logo"
-                                    height="40"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-10 w-fit dark:invert"
-                                    src="https://cdn.worldvectorlogo.com/logos/ue-union-europea.svg"
-                                    alt="Lemon Squeezy Logo"
-                                    height="40"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-8 w-fit dark:invert"
-                                    src="https://www.metropolis.org/sites/default/files/styles/max_325x325/public/2021-03/cideu-logo.png?itok=SFJnXTm4"
-                                    alt="Laravel Logo"
-                                    height="32"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-14 w-fit dark:invert"
-                                    src="https://banner2.cleanpng.com/20180721/yra/kisspng-united-nations-office-at-nairobi-habitat-iii-unite-women-political-leaders-global-forum-5b52b25e232048.4138122215321462701439.jpg"
-                                    alt="Lilly Logo"
-                                    height="52"
-                                    width="auto"
-                                />
-                            </div>
-
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-12 w-fit dark:invert"
-                                    src="https://www.bcie.org/typo3conf/ext/bcie_package/Resources/Public/Images/logo-cabei-2021.png"
-                                    alt="OpenAI Logo"
-                                    height="48"
-                                    width="auto"
-                                />
-                            </div>
+                            {
+                                logos.map((logo: any, index: number) => (
+                                    <div className="flex" key={logo.Url}>
+                                        <img
+                                            className="mx-auto size-8 w-fit dark:invert"
+                                            src={import.meta.env.PUBLIC_STRAPI_URL + logo.institucion.Media.url}
+                                            alt="Nvidia Logo"
+                                            height="40"
+                                            width="auto"
+                                        />
+                                    </div>
+                                ))
+                            }
                         </InfiniteSlider>
 
                         <div

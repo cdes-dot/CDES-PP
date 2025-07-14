@@ -1,11 +1,13 @@
 ---
 import { Button } from "@/components/ui/button";
+
+const { title, content, media } = Astro.props;
 ---
 
 <section class="py-16 md:py-32">
     <div class="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16">
         <h2 class="relative z-10 max-w-xl text-4xl font-medium lg:text-5xl">
-            Plan Estratégico De Santiago 2030
+            {title}
         </h2>
         <div class="grid gap-6 sm:grid-cols-2 md:gap-12 lg:gap-24">
             <div class="relative mb-6 sm:mb-0">
@@ -13,16 +15,9 @@ import { Button } from "@/components/ui/button";
                     class="aspect-76/59 relative rounded-2xl from-zinc-300 to-transparent p-px dark:from-zinc-700"
                 >
                     <img
-                        src="/payments.png"
-                        class="hidden rounded-[15px] dark:block"
+                        src={import.meta.env.PUBLIC_STRAPI_URL + media.url}
+                        class="rounded-[15px] dark:block"
                         alt="payments illustration dark"
-                        width={1207}
-                        height={929}
-                    />
-                    <img
-                        src="/content-image.svg"
-                        class=""
-                        alt="payments illustration light"
                         width={1207}
                         height={929}
                     />
@@ -30,19 +25,24 @@ import { Button } from "@/components/ui/button";
             </div>
 
             <div class="relative space-y-4">
-                <p class="text-muted-foreground">
-                    Planificación y articulación de proyectos de impacto social
-                    para la ciudad de <span
-                        class="text-accent-foreground font-bold">Santiago.</span
+                {
+                    content.map((paragraph: any) => {
+                       return paragraph.children.map((item: any) => (
+                            <p class="text-muted-foreground">
+                                {item.text}
+                            </p>
+                        ));
+                    })
+                }
+
+                <a
+                    href="/plan-estrategico-de-santiago"
+                    class="cursor-pointer hover:opacity-90 transition-opacity"
+                >
+                    <Button
+                        variant="default"
+                        className="cursor-pointer hover:shadow-lg transition-shadow"
                     >
-                </p>
-                <p class="text-muted-foreground">
-                    Estructurados de forma estratégica, que a través de un
-                    consenso social, proveen propuestas que impactan de forma
-                    positiva el futuro de nuestros ciudadanos.
-                </p>
-                <a href="/plan-estrategico-de-santiago" class="cursor-pointer hover:opacity-90 transition-opacity">
-                    <Button variant="default" className="cursor-pointer hover:shadow-lg transition-shadow">
                         Saber Más
                     </Button>
                 </a>

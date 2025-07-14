@@ -1,19 +1,30 @@
 ---
-import HeroSection from '@/components/Hero';
-import NewsSection from '@/components/News';
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-import FooterSection from '@/components/astro/FooterSection.astro';
-import ContentSection from '@/components/astro/ContentSection.astro';
-import CarouselVideos from '@/components/Videos';
-import InfographySection from '@/components/astro/InfographySection.astro';
+import HeroSection from "@/components/Hero";
+import NewsSection from "@/components/News";
+import Welcome from "../components/Welcome.astro";
+import Layout from "../layouts/Layout.astro";
+import ContentSection from "@/components/astro/ContentSection.astro";
+import CarouselVideos from "@/components/Videos";
+import InfographySection from "@/components/astro/InfographySection.astro";
+import { getData } from "lib/fetch";
+const { Carrousel, Destacados, Plan } = await getData(
+    "pagina-principal?populate[Carrousel][populate]=*&populate[Destacados][populate]=*&populate[Plan][populate]=*",
+);
+console.log(Plan);
 ---
 
 <Layout>
-    <HeroSection client:load />
-    <NewsSection client:load />
-    <ContentSection/>
-    <CarouselVideos client:load />
-    <InfographySection/>  
-    <FooterSection/>
+    <HeroSection slides={Carrousel} client:only />
+    <NewsSection
+        news={Destacados.articulos}
+        title={Destacados.Titulo}
+        subtitle={Destacados.Subtitulo}
+        client:only
+    />
+    <ContentSection
+        title={Plan.Titulo}
+        content={Plan.Contenido}
+        media={Plan.Media}
+    />
+    <CarouselVideos client:only />
 </Layout>

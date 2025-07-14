@@ -1,106 +1,28 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { Calendar, User, ArrowLeft, Volume2 } from 'lucide-react';
-
+import { getData } from "lib/fetch";
+import Layout from "../../layouts/Layout.astro";
+import { Calendar, User, ArrowLeft, Volume2 } from "lucide-react";
+export const prerender = false;
+const { id } = Astro.params;
+console.log(id);
+const noticia = await getData("articulos/" + id + "?populate=*");
+console.log(noticia);
 export async function getStaticPaths() {
-    const noticias = [
-        {
-            id: "1",
-            titulo: "Ulises Rodríguez designa comisión especialistas para formular propuesta de Santiago al Premio Global Mayors Challenge 2025 de la Fundación Bloomberg",
-            descripcion: "El alcalde por Santiago, Ulises Rodríguez, designa comisión de expertos integrada por el doctor Reynaldo Peguero, director del Plan Estratégico de Santiago 2030, el ingeniero Ervin Vargas, asesor de urbanismo de la alcaldía y a Johanna Castillo directora de la Oficina Municipal de Planeamiento Urbano del Ayuntamiento para diseñar la propuesta de participación de Santiago en el Premio Bloomberg Philanthropies 2025 Global Mayors Challenge.",
-            contenido: `
-                <p>El alcalde por Santiago, Ulises Rodríguez, ha dado un paso importante hacia la innovación urbana al designar una comisión de expertos de alto calibre para formular la propuesta de participación de Santiago en el prestigioso Premio Bloomberg Philanthropies 2025 Global Mayors Challenge.</p>
-                
-                <h3>Comisión de Expertos</h3>
-                <p>La comisión está integrada por:</p>
-                <ul>
-                    <li><strong>Dr. Reynaldo Peguero</strong> - Director del Plan Estratégico de Santiago 2030</li>
-                    <li><strong>Ing. Ervin Vargas</strong> - Asesor de urbanismo de la alcaldía</li>
-                    <li><strong>Johanna Castillo</strong> - Directora de la Oficina Municipal de Planeamiento Urbano del Ayuntamiento</li>
-                </ul>
-                
-                <h3>Sobre el Premio</h3>
-                <p>El Premio Bloomberg Philanthropies 2025 Global Mayors Challenge es una iniciativa que reconoce y premia con <strong>US$ 1,000,000.00 (Un millón de dólares)</strong> las soluciones más innovadoras para solventar los desafíos y retos en las ciudades contemporáneas.</p>
-                
-                <p>Este premio no solo representa una oportunidad económica significativa, sino también una plataforma para proyectar la visión y el compromiso de la gestión local de Santiago a nivel internacional.</p>
-                
-                <h3>Impacto Esperado</h3>
-                <p>La participación de Santiago en este concurso global representa una oportunidad única para:</p>
-                <ul>
-                    <li>Implementar soluciones innovadoras a problemas urbanos locales</li>
-                    <li>Posicionar a Santiago como una ciudad líder en innovación en el Caribe</li>
-                    <li>Acceder a recursos financieros significativos para el desarrollo urbano</li>
-                    <li>Conectar con una red global de ciudades innovadoras</li>
-                </ul>
-            `,
-            imagen: "/news.jpg",
-            autor: "Equipo CDES",
-            fecha: "2024-12-20",
-            hora: "14:30"
-        },
-        {
-            id: "2",
-            titulo: "Foro Educativo de la Calidad valorará logros y desafíos del sector en Santiago",
-            descripcion: "El Auditorio Magno del Centro León acogerá el próximo 28 de noviembre el primer Foro de la Calidad Educativa, un evento organizado por el Consejo para el Desarrollo Estratégico de Santiago (CDES) que reunirá a los principales actores del sector educativo de la ciudad.",
-            contenido: `
-                <p>Con el objetivo de evaluar los avances y definir los retos pendientes en materia educativa, el Consejo para el Desarrollo Estratégico de Santiago (CDES) organiza el primer Foro de la Calidad Educativa. El evento se celebrará el próximo 28 de noviembre en el Auditorio Magno del Centro León.</p>
-                
-                <h3>Participantes Destacados</h3>
-                <p>El foro contará con la participación de directores de centros educativos, rectores de universidades, representantes del Ministerio de Educación y expertos en políticas públicas educativas. Se espera un diálogo abierto y constructivo para trazar una hoja de ruta que eleve la calidad de la educación en Santiago.</p>
+    const noticias = await getData("articulos");
 
-                <h3>Temas a Tratar</h3>
-                <ul>
-                    <li>Innovación curricular y nuevas tecnologías en el aula.</li>
-                    <li>Formación docente y desarrollo profesional.</li>
-                    <li>Inclusión y equidad en el sistema educativo.</li>
-                    <li>Alianzas público-privadas para el fortalecimiento de la educación.</li>
-                </ul>
-            `,
-            imagen: "/viena-1.jpg",
-            autor: "Dr. Reynaldo Peguero",
-            fecha: "2024-11-22",
-            hora: "11:00"
-        },
-        {
-            id: "3",
-            titulo: "CDES presenta nuevo plan de movilidad urbana para Santiago",
-            descripcion: "El Consejo para el Desarrollo Estratégico de Santiago (CDES) ha presentado un ambicioso plan de movilidad urbana sostenible que busca transformar el transporte en la ciudad durante la próxima década, priorizando al peatón y el transporte público.",
-            contenido: `
-                <p>En un evento celebrado en el Palacio Consistorial, el CDES desveló el nuevo Plan de Movilidad Urbana Sostenible (PMUS) para Santiago. Este plan es el resultado de dos años de estudios y consultas con expertos y la ciudadanía.</p>
-
-                <h3>Ejes Principales del Plan</h3>
-                <p>El PMUS se articula en torno a cuatro ejes fundamentales:</p>
-                <ol>
-                    <li><strong>Modernización del transporte público:</strong> Renovación de la flota de autobuses con vehículos de bajas emisiones y optimización de rutas.</li>
-                    <li><strong>Infraestructura para la movilidad activa:</strong> Creación de más de 50 kilómetros de nuevas ciclovías y ampliación de aceras.</li>
-                    <li><strong>Gestión inteligente del tráfico:</strong> Implementación de un sistema de semáforos centralizado y adaptativo.</li>
-                    <li><strong>Promoción de la intermodalidad:</strong> Facilidades para combinar el uso de bicicletas, transporte público y caminata.</li>
-                </ol>
-                <p>El presidente del CDES, Ricardo Fondeur, destacó que "este plan no solo mejorará la fluidez del tráfico, sino que hará de Santiago una ciudad más saludable, equitativa y amigable con el medio ambiente".</p>
-            `,
-            imagen: "/viena-2.jpg",
-            autor: "Equipo CDES",
-            fecha: "2024-11-15",
-            hora: "09:00"
-        }
-    ];
-
-    return noticias.map((noticia) => ({
-        params: { id: noticia.id },
-        props: { noticia }
+    return noticias.map((item: any) => ({
+        params: { id: item.documentId },
     }));
 }
 
-const { noticia } = Astro.props;
-
 function formatearFecha(fecha: string, hora: string) {
     const fechaObj = new Date(`${fecha}T${hora}`);
-    return fechaObj.toLocaleDateString('es-DO', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+    return fechaObj.toLocaleDateString("es-DO", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
     });
 }
 ---
@@ -110,11 +32,11 @@ function formatearFecha(fecha: string, hora: string) {
         <div class="container mx-auto max-w-4xl px-6">
             <!-- Botón volver -->
             <div class="mb-8">
-                <a 
+                <a
                     href="/noticias"
                     class="inline-flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors"
                 >
-                    <ArrowLeft class="w-4 h-4" />
+                    <ArrowLeft className="w-4 h-4" />
                     <span>Volver a noticias</span>
                 </a>
             </div>
@@ -122,8 +44,9 @@ function formatearFecha(fecha: string, hora: string) {
             <!-- Imagen destacada -->
             <div class="aspect-video overflow-hidden rounded-lg mb-8">
                 <img
-                    src={noticia.imagen}
-                    alt={noticia.titulo}
+                    src={import.meta.env.PUBLIC_STRAPI_URL +
+                        noticia.Portada.url}
+                    alt={noticia.Titulo}
                     class="w-full h-full object-cover"
                 />
             </div>
@@ -131,42 +54,65 @@ function formatearFecha(fecha: string, hora: string) {
             <!-- Contenido del artículo -->
             <article class="prose prose-lg max-w-none">
                 <!-- Título -->
-                <h1 id="article-title" class="text-4xl font-bold mb-6 font-playfair">
-                    {noticia.titulo}
+                <h1
+                    id="article-title"
+                    class="text-4xl font-bold mb-6 font-playfair"
+                >
+                    {noticia.Titulo}
                 </h1>
 
                 <!-- Metadata -->
-                <div class="flex items-center space-x-6 text-muted-foreground mb-8 not-prose">
+                <div
+                    class="flex items-center space-x-6 text-muted-foreground mb-8 not-prose"
+                >
                     <div class="flex items-center space-x-2">
-                        <User class="w-5 h-5" />
-                        <span class="font-medium">{noticia.autor}</span>
+                        <User className="w-5 h-5" />
+                        <span class="font-medium">{noticia.autor.Nombre}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <Calendar class="w-5 h-5" />
-                        <span>{formatearFecha(noticia.fecha, noticia.hora)}</span>
+                        <Calendar className="w-5 h-5" />
+                        <span>{noticia.Creacion}</span>
                     </div>
                 </div>
 
                 <!-- Botón para leer -->
-                <button id="read-aloud-btn" class="flex items-center space-x-2 text-primary mb-8 not-prose hover:text-primary/80 transition-colors">
-                    <Volume2 client:load class="w-5 h-5" />
+                <button
+                    id="read-aloud-btn"
+                    class="flex items-center space-x-2 text-primary mb-8 not-prose hover:text-primary/80 transition-colors"
+                >
+                    <Volume2 client:load className="w-5 h-5" />
                     <span class="font-medium">Leer en voz alta</span>
                 </button>
 
                 <!-- Descripción/Lead -->
-                <div id="article-description" class="text-xl text-muted-foreground mb-8 font-inter leading-relaxed">
-                    {noticia.descripcion}
+                <div
+                    id="article-description"
+                    class="text-xl text-muted-foreground mb-8 font-inter leading-relaxed"
+                >
+                    {noticia.Content[0].children[0].text}
                 </div>
 
                 <!-- Contenido principal -->
-                <div id="article-content" class="font-inter" set:html={noticia.contenido}></div>
+                <div id="article-content" class="font-inter">
+                    {
+                        noticia.Content.map((paragraph: any) => {
+                            return paragraph.children.map((item: any) => (
+                                <p class="text-muted-foreground mb-4">
+                                    {item.text}
+                                </p>
+                            ));
+                        })
+                    }
+                </div>
             </article>
 
             <!-- Compartir (opcional) -->
             <div class="mt-12 pt-8 border-t">
-                <h3 class="text-lg font-semibold mb-4">Compartir esta noticia</h3>
+                <h3 class="text-lg font-semibold mb-4">
+                    Compartir esta noticia
+                </h3>
                 <div class="flex space-x-4">
-                    <a 
+                    <a
                         href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(noticia.titulo)}&url=${encodeURIComponent(`https://cdes-santiago.com/noticias/${noticia.id}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -174,7 +120,7 @@ function formatearFecha(fecha: string, hora: string) {
                     >
                         Twitter
                     </a>
-                    <a 
+                    <a
                         href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://cdes-santiago.com/noticias/${noticia.id}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -188,16 +134,17 @@ function formatearFecha(fecha: string, hora: string) {
     </main>
 </Layout>
 
-<script>
-    const readAloudBtn = document.getElementById('read-aloud-btn');
-    const articleTitle = document.getElementById('article-title');
-    const articleDescription = document.getElementById('article-description');
+{
+     <script>
+    const readAloudBtn = document.getElementById('read-aloud-btn')!;
+    const articleTitle = document.getElementById('article-title')!;
+    const articleDescription = document.getElementById('article-description')!;
     const articleContent = document.getElementById('article-content');
 
     let isReading = false;
     let utterance = null;
 
-    function stripHtml(html) {
+    function stripHtml(html: any) {
         let tmp = document.createElement("DIV");
         tmp.innerHTML = html;
         return tmp.textContent || tmp.innerText || "";
@@ -255,3 +202,4 @@ function formatearFecha(fecha: string, hora: string) {
         }
     });
 </script>
+}

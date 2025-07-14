@@ -1,55 +1,52 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Calendar, User } from 'lucide-react';
+import { getData } from 'lib/fetch';
+export const prerender = false
+import { Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const noticias = [
-    {
-        id: 1,
-        titulo: "Ulises Rodríguez designa comisión especialistas para formular propuesta de Santiago al Premio Global Mayors Challenge 2025 de la Fundación Bloomberg",
-        descripcion: "El alcalde por Santiago, Ulises Rodríguez, designa comisión de expertos integrada por el doctor Reynaldo Peguero, director del Plan Estratégico de Santiago 2030, el ingeniero Ervin Vargas, asesor de urbanismo de la alcaldía y a Johanna Castillo directora de la Oficina Municipal de Planeamiento Urbano del Ayuntamiento para diseñar la propuesta de participación de Santiago en el Premio Bloomberg Philanthropies 2025 Global Mayors Challenge. Una iniciativa que premia con US$ 1,000,000.00 (Un millón de dólares), las soluciones innovadoras para solventar los desafíos y retos en las ciudades, proyectar la visión y el compromiso de la gestión local.",
-        imagen: "/news.jpg",
-        autor: "Equipo CDES",
-        fecha: "2024-12-20",
-        hora: "14:30"
-    },
-    {
-        id: 2,
-        titulo: "Foro Educativo de la Calidad valorará logros y desafíos del sector en Santiago",
-        descripcion: "El Auditorio Magno del Centro León acogerá el próximo 28 de noviembre el primer Foro de la Calidad Educativa, un evento organizado por el Consejo para el Desarrollo Estratégico de Santiago (CDES) que reunirá a los principales actores del sector educativo de la ciudad. Este encuentro tiene como objetivo evaluar los avances y identificar los retos pendientes en materia educativa en Santiago.",
-        imagen: "/news.jpg",
-        autor: "Dr. Reynaldo Peguero",
-        fecha: "2024-12-18",
-        hora: "10:15"
-    },
-    {
-        id: 3,
-        titulo: "Plan Estratégico Santiago 2030 presenta avances en desarrollo urbano sostenible",
-        descripcion: "El Plan Estratégico de Santiago 2030 ha presentado importantes avances en sus proyectos de desarrollo urbano sostenible, incluyendo la implementación de espacios verdes, mejora del transporte público y la promoción de energías renovables. Estos proyectos forman parte de la visión integral para convertir a Santiago en una ciudad modelo de sostenibilidad en el Caribe.",
-        imagen: "/news.jpg",
-        autor: "Ing. Ervin Vargas",
-        fecha: "2024-12-15",
-        hora: "16:45"
+// Obtener parámetros de la URL
+const url = new URL(Astro.request.url);
+const currentPage = parseInt(url.searchParams.get('page') || '1');
+const itemsPerPage = 6; // Número de noticias por página
+
+const data = await getData("articulos?populate=*");
+
+// Calcular paginación
+const totalItems = data.length;
+const totalPages = Math.ceil(totalItems / itemsPerPage);
+const startIndex = (currentPage - 1) * itemsPerPage;
+const endIndex = startIndex + itemsPerPage;
+const currentNews = data.slice(startIndex, endIndex);
+
+// Generar números de página para mostrar
+const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+        for (let i = 1; i <= totalPages; i++) {
+            pages.push(i);
+        }
+    } else {
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(totalPages, currentPage + 2);
+        
+        if (currentPage <= 3) {
+            end = maxVisiblePages;
+        } else if (currentPage >= totalPages - 2) {
+            start = totalPages - maxVisiblePages + 1;
+        }
+        
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
     }
-];
+    
+    return pages;
+};
 
-// Ordenar noticias por fecha y hora (más nueva primero)
-const noticiasOrdenadas = noticias.sort((a, b) => {
-    const fechaA = new Date(`${a.fecha}T${a.hora}`);
-    const fechaB = new Date(`${b.fecha}T${b.hora}`);
-    return fechaB.getTime() - fechaA.getTime(); // Orden descendente
-});
-
-function formatearFecha(fecha: string, hora: string) {
-    const fechaObj = new Date(`${fecha}T${hora}`);
-    return fechaObj.toLocaleDateString('es-DO', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
+const pageNumbers = getPageNumbers();
 ---
 
 <Layout>
@@ -63,19 +60,21 @@ function formatearFecha(fecha: string, hora: string) {
                 <p class="text-muted-foreground text-lg font-inter">
                     Mantente al día con las últimas noticias del Consejo para el Desarrollo Estratégico de Santiago
                 </p>
+                <p class="text-sm text-muted-foreground mt-2">
+                    Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} noticias
+                </p>
             </div>
 
             <!-- Lista vertical de noticias -->
-            <div class="space-y-8">
-                {noticiasOrdenadas.map((noticia, index) => (
-                    <Card class="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div class="space-y-8 mb-12">
+                {currentNews.map((noticia: any, index: number) => (
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-0">
-                            <!-- Imagen -->
                             <div class="md:col-span-1">
                                 <div class="aspect-video md:aspect-square overflow-hidden">
                                     <img
-                                        src={noticia.imagen}
-                                        alt={noticia.titulo}
+                                        src={import.meta.env.PUBLIC_STRAPI_URL + noticia.Portada?.url}
+                                        alt={noticia.Titulo}
                                         class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                                     />
                                 </div>
@@ -86,38 +85,42 @@ function formatearFecha(fecha: string, hora: string) {
                                 <!-- Badge de posición -->
                                 <div class="flex items-center mb-3">
                                     <span class="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
-                                        #{index + 1}
+                                        #{startIndex + index + 1}
                                     </span>
                                     <div class="ml-auto flex items-center space-x-1 text-xs text-muted-foreground">
-                                        <Calendar class="w-4 h-4" />
-                                        <span>{formatearFecha(noticia.fecha, noticia.hora)}</span>
+                                        <Calendar className="w-4 h-4" />
+                                        <span>{noticia.Creacion}</span>
                                     </div>
                                 </div>
                                 
                                 <!-- Título -->
                                 <h2 class="text-2xl font-semibold mb-3 line-clamp-2 font-noto">
                                     <a 
-                                        href={`/noticias/${noticia.id}`}
+                                        href={`/noticias/${noticia.documentId}`}
                                         class="hover:text-primary transition-colors"
                                     >
-                                        {noticia.titulo}
+                                        {noticia.Titulo}
                                     </a>
                                 </h2>
                                 
                                 <!-- Descripción -->
-                                <p class="text-muted-foreground text-base mb-4 line-clamp-3 font-inter leading-relaxed">
-                                    {noticia.descripcion}
-                                </p>
-                                
+                                {noticia.Content?.[0]?.children?.map((paragraph: any, pIndex: number) => (
+                                    pIndex === 0 && (
+                                        <p class="text-muted-foreground text-base mb-4 line-clamp-3 font-inter leading-relaxed">
+                                            {paragraph.text}
+                                        </p>
+                                    )
+                                ))}
+                              
                                 <!-- Metadata y botón -->
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-1 text-sm text-muted-foreground">
-                                        <User class="w-4 h-4" />
-                                        <span>{noticia.autor}</span>
+                                        <User className="w-4 h-4" />
+                                        <span>{noticia.autor?.Nombre || 'CDES'}</span>
                                     </div>
                                     
                                     <a 
-                                        href={`/noticias/${noticia.id}`}
+                                        href={`/noticias/${noticia.documentId}`}
                                         class="text-primary hover:text-primary/80 text-sm font-medium transition-colors"
                                     >
                                         Leer más →
@@ -128,6 +131,61 @@ function formatearFecha(fecha: string, hora: string) {
                     </Card>
                 ))}
             </div>
+
+            <!-- Paginación -->
+            {totalPages > 1 && (
+                <nav class="flex justify-center items-center space-x-2">
+                    <!-- Botón Anterior -->
+                    {currentPage > 1 ? (
+                        <a 
+                            href={`/noticias?page=${currentPage - 1}`}
+                            class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                        >
+                            <ChevronLeft className="w-4 h-4 mr-1" />
+                            Anterior
+                        </a>
+                    ) : (
+                        <span class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground/50 bg-background border border-border rounded-md cursor-not-allowed">
+                            <ChevronLeft className="w-4 h-4 mr-1" />
+                            Anterior
+                        </span>
+                    )}
+
+                    <!-- Números de página -->
+                    <div class="flex space-x-1">
+                        {pageNumbers.map((pageNum) => (
+                            pageNum === currentPage ? (
+                                <span class="px-3 py-2 text-sm font-medium text-primary-foreground bg-primary border border-primary rounded-md">
+                                    {pageNum}
+                                </span>
+                            ) : (
+                                <a 
+                                    href={`/noticias?page=${pageNum}`}
+                                    class="px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                                >
+                                    {pageNum}
+                                </a>
+                            )
+                        ))}
+                    </div>
+
+                    <!-- Botón Siguiente -->
+                    {currentPage < totalPages ? (
+                        <a 
+                            href={`/noticias?page=${currentPage + 1}`}
+                            class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                        >
+                            Siguiente
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                        </a>
+                    ) : (
+                        <span class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground/50 bg-background border border-border rounded-md cursor-not-allowed">
+                            Siguiente
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                        </span>
+                    )}
+                </nav>
+            )}
         </div>
     </main>
 </Layout>

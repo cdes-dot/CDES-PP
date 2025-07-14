@@ -2,17 +2,7 @@
 import { Menu as MenuIcon, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-const menuItems = [
-    { name: 'Acerca de nosotros', href: '/nosotros' },
-    { name: 'Proyectos', href: '/proyectos' },
-    { name: 'PES', href: '/plan-estrategico-de-santiago' },
-    { name: 'Calendario', href: '/calendario'},
-    { name: 'Noticias', href: '/noticias' },
-    { name: 'Biblioteca', href: '/biblioteca' },
-    { name: 'Contacto', href: '/contacto' },
-]
-
-export function Menu() {
+export function Menu({ menuItems, logo}: { menuItems:  any[], logo: string  }) {
 
     const [menuState, setMenuState] = useState(false)
 
@@ -29,7 +19,7 @@ export function Menu() {
                                 href="/"
                                 aria-label="home"
                                 className="flex items-center space-x-2">
-                                <img src={"/favicon.svg"} className='w-1/3 h-fit' width={48} height={48} alt="logo" />
+                                <img src={logo} className='w-1/3 h-fit' width={48} height={48} alt="logo" />
                             </a>
 
                             <button
@@ -48,9 +38,9 @@ export function Menu() {
                                     {menuItems.map((item, index) => (
                                         <li key={item.name}>
                                             <a
-                                                href={item.href}
+                                                href={item.Url}
                                                 className="text-muted-foreground hover:text-accent-foreground block duration-150">
-                                                <span>{item.name}</span>
+                                                <span>{item.Contenido}</span>
                                             </a>
                                         </li>
                                     ))}
