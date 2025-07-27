@@ -71,7 +71,19 @@ console.log(`${import.meta.env.PUBLIC_STRAPI_URL}${Icono.url}`);
         <title>{Titulo}</title>
     </head>
     <body>
-        <Menu menuItems={Paginas}, logo={import.meta.env.PUBLIC_STRAPI_URL + Logo.url} />
+        <div class="flex justify-between items-center p-4">
+            <Menu menuItems={Paginas} logo={import.meta.env.PUBLIC_STRAPI_URL + Logo.url} />
+            
+            <!-- Theme Toggle Button -->
+            <button 
+                id="theme-toggle" 
+                class="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors border border-border"
+                aria-label="Toggle theme"
+            >
+                <span id="theme-icon" class="text-lg">🌙</span>
+            </button>
+        </div>
+        
         <slot />
 
         <script>
@@ -137,6 +149,26 @@ console.log(`${import.meta.env.PUBLIC_STRAPI_URL}${Icono.url}`);
                         }
                     });
                 });
+
+                // Theme toggle functionality
+                const themeToggle = document.getElementById('theme-toggle');
+                const themeIcon = document.getElementById('theme-icon');
+                
+                function updateThemeIcon() {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    themeIcon.textContent = isDark ? '☀️' : '🌙';
+                }
+                
+                themeToggle?.addEventListener('click', () => {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    document.documentElement.classList.toggle('dark', !isDark);
+                    
+                    // The existing MutationObserver will automatically save to localStorage
+                    updateThemeIcon();
+                });
+                
+                // Initial icon update
+                updateThemeIcon();
             });
         </script>
         <FooterSection/>

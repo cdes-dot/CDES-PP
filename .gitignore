@@ -20,5 +20,8 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
+sqlfile.sql
+backup.dump
+
 # jetbrains setting folder
 .idea/
