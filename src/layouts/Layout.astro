@@ -79,10 +79,7 @@ console.log(`${import.meta.env.PUBLIC_STRAPI_URL}${Icono.url}`);
     </head>
     <body>
         <div class="flex justify-between items-center p-4">
-            <Menu
-                menuItems={Paginas}
-                logo={Logo.url.replace("https", "https:")}
-            />
+            <Menu menuItems={Paginas} logo={Logo.url} />
 
             <!-- Theme Toggle Button -->
             <button

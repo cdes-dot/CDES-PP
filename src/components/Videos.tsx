@@ -79,7 +79,7 @@ export default function CarouselVideos() {
                       onPause={handleVideoPause}
                     >
                       <source
-                        src={video.url.replace("https", "https:")}
+                        src={video.url}
                         type="video/mp4"
                       />
                       Tu navegador no soporta el elemento video.

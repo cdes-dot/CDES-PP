@@ -44,7 +44,7 @@ export default function LogosSection() {
                 <div className="flex" key={logo.Url}>
                   <img
                     className="mx-auto size-8 w-fit dark:invert"
-                    src={logo.institucion.Media.url.replace("https", "https:")}
+                    src={logo.institucion.Media.url}
                     alt="Nvidia Logo"
                     height="40"
                     width="auto"
