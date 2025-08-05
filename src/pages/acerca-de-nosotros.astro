@@ -7,7 +7,6 @@ const { Titulo, Historia, Evento } = await getData("acerca-de?populate=*");
 const miembros = await getData("miembros?populate=*");
 //console.log(Titulo)
 // Datos de los miembros del CDES
- 
 ---
 
 <Layout>
@@ -21,7 +20,7 @@ const miembros = await getData("miembros?populate=*");
                 >
                     <div class="text-center lg:text-left space-y-2">
                         <h1 class="mb-6 text-4xl font-semibold md:text-5xl">
-                            {Titulo} 
+                            {Titulo}
                         </h1>
                         {
                             Historia.map((paragraph: any) => {
@@ -40,7 +39,7 @@ const miembros = await getData("miembros?populate=*");
                 </div>
             </div>
         </section>
-        <div class="mx-auto max-w-7xl px-6 ">
+        <div class="mx-auto max-w-7xl px-6">
             <Timeline timeline={Evento} client:load />
         </div>
 
@@ -53,7 +52,9 @@ const miembros = await getData("miembros?populate=*");
                     >
                         Junta Directiva
                     </h2>
-                    <p class="mt-4 text-lg text-neutral-600 dark:text-neutral-100 ">
+                    <p
+                        class="mt-4 text-lg text-neutral-600 dark:text-neutral-100"
+                    >
                         Conoce a los miembros que lideran el Consejo para el
                         Desarrollo Estratégico de Santiago
                     </p>
@@ -67,7 +68,10 @@ const miembros = await getData("miembros?populate=*");
                             <div class="bg-white dark:bg-muted text-gray-500 dark:text-neutral-50 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                                 <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
                                     <img
-                                        src={import.meta.env.PUBLIC_STRAPI_URL + miembro.Portada.url}
+                                        src={miembro.Portada.url.replace(
+                                            "https",
+                                            "https:",
+                                        )}
                                         alt={`Foto de ${miembro.Nombres}`}
                                         class="h-110 w-full object-cover object-center"
                                         onerror="this.src='/miembros/default-avatar.jpg'"

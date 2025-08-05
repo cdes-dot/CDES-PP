@@ -23,7 +23,7 @@ const currentNews = data.slice(startIndex, endIndex);
 const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
         for (let i = 1; i <= totalPages; i++) {
             pages.push(i);
@@ -31,18 +31,18 @@ const getPageNumbers = () => {
     } else {
         let start = Math.max(1, currentPage - 2);
         let end = Math.min(totalPages, currentPage + 2);
-        
+
         if (currentPage <= 3) {
             end = maxVisiblePages;
         } else if (currentPage >= totalPages - 2) {
             start = totalPages - maxVisiblePages + 1;
         }
-        
+
         for (let i = start; i <= end; i++) {
             pages.push(i);
         }
     }
-    
+
     return pages;
 };
 
@@ -73,13 +73,13 @@ const pageNumbers = getPageNumbers();
                             <div class="md:col-span-1">
                                 <div class="aspect-video md:aspect-square overflow-hidden">
                                     <img
-                                        src={import.meta.env.PUBLIC_STRAPI_URL + noticia.Portada?.url}
+                                        src={noticia.Portada?.url.replace("https", "https:")}
                                         alt={noticia.Titulo}
                                         class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                                     />
                                 </div>
                             </div>
-                            
+
                             <!-- Contenido -->
                             <div class="md:col-span-2 p-6">
                                 <!-- Badge de posición -->
@@ -92,17 +92,17 @@ const pageNumbers = getPageNumbers();
                                         <span>{noticia.Creacion}</span>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Título -->
                                 <h2 class="text-2xl font-semibold mb-3 line-clamp-2 font-noto">
-                                    <a 
+                                    <a
                                         href={`/noticias/${noticia.documentId}`}
                                         class="hover:text-primary transition-colors"
                                     >
                                         {noticia.Titulo}
                                     </a>
                                 </h2>
-                                
+
                                 <!-- Descripción -->
                                 {noticia.Content?.[0]?.children?.map((paragraph: any, pIndex: number) => (
                                     pIndex === 0 && (
@@ -111,15 +111,15 @@ const pageNumbers = getPageNumbers();
                                         </p>
                                     )
                                 ))}
-                              
+
                                 <!-- Metadata y botón -->
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-1 text-sm text-muted-foreground">
                                         <User className="w-4 h-4" />
                                         <span>{noticia.autor?.Nombre || 'CDES'}</span>
                                     </div>
-                                    
-                                    <a 
+
+                                    <a
                                         href={`/noticias/${noticia.documentId}`}
                                         class="text-primary hover:text-primary/80 text-sm font-medium transition-colors"
                                     >
@@ -137,7 +137,7 @@ const pageNumbers = getPageNumbers();
                 <nav class="flex justify-center items-center space-x-2">
                     <!-- Botón Anterior -->
                     {currentPage > 1 ? (
-                        <a 
+                        <a
                             href={`/noticias?page=${currentPage - 1}`}
                             class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
                         >
@@ -159,7 +159,7 @@ const pageNumbers = getPageNumbers();
                                     {pageNum}
                                 </span>
                             ) : (
-                                <a 
+                                <a
                                     href={`/noticias?page=${pageNum}`}
                                     class="px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
                                 >
@@ -171,7 +171,7 @@ const pageNumbers = getPageNumbers();
 
                     <!-- Botón Siguiente -->
                     {currentPage < totalPages ? (
-                        <a 
+                        <a
                             href={`/noticias?page=${currentPage + 1}`}
                             class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
                         >
