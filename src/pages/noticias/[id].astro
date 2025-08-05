@@ -44,8 +44,7 @@ function formatearFecha(fecha: string, hora: string) {
             <!-- Imagen destacada -->
             <div class="aspect-video overflow-hidden rounded-lg mb-8">
                 <img
-                    src={import.meta.env.PUBLIC_STRAPI_URL +
-                        noticia.Portada.url}
+                    src={noticia.Portada.url.replace('http//', 'https://')}
                     alt={noticia.Titulo}
                     class="w-full h-full object-cover"
                 />
@@ -162,7 +161,7 @@ function formatearFecha(fecha: string, hora: string) {
             const titleText = articleTitle ? articleTitle.innerText : '';
             const descriptionText = articleDescription ? articleDescription.innerText : '';
             const contentText = articleContent ? stripHtml(articleContent.innerHTML) : '';
-            
+
             const fullText = `${titleText}. ${descriptionText}. ${contentText}`;
 
             utterance = new SpeechSynthesisUtterance(fullText);
@@ -184,7 +183,7 @@ function formatearFecha(fecha: string, hora: string) {
                     <span class="font-medium">Leer en voz alta</span>
                 `;
             };
-            
+
             speechSynthesis.speak(utterance);
         }
     }
