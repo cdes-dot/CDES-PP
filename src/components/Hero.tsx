@@ -87,7 +87,7 @@ export default function HeroSection({ slides }: { slides: any[] }) {
                   {slides.map((image, index) => (
                     <div key={index} className="w-full flex-shrink-0">
                       <img
-                        src={image.Fondo.url.replace("https", "https:")}
+                        src={image.Fondo.url}
                         alt={`Background slide ${index + 1}`}
                         width={2796}
                         height={2008}
