@@ -46,19 +46,7 @@ const miembros = await getData("miembros?populate=*");
         <!-- Sección de Miembros del CDES -->
         <section class="py-16 md:py-24 bg-background">
             <div class="mx-auto max-w-7xl px-6">
-                <div class="text-center mb-12">
-                    <h2
-                        class="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-4xl"
-                    >
-                        Junta Directiva
-                    </h2>
-                    <p
-                        class="mt-4 text-lg text-neutral-600 dark:text-neutral-100"
-                    >
-                        Conoce a los miembros que lideran el Consejo para el
-                        Desarrollo Estratégico de Santiago
-                    </p>
-                </div>
+                <Timeline timeline={Evento} client:load />
 
                 <div
                     class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"

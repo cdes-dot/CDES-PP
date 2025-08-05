@@ -79,16 +79,16 @@ console.log(`${import.meta.env.PUBLIC_STRAPI_URL}${Icono.url}`);
     </head>
     <body>
         <div class="flex justify-between items-center p-4">
-            <Menu menuItems={Paginas} logo={Logo.url} />
+            <Menu menuItems={Paginas} logo={Logo.url} client:only />
 
             <!-- Theme Toggle Button -->
-            <button
+            <!-- <button
                 id="theme-toggle"
                 class="p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors border border-border"
                 aria-label="Toggle theme"
             >
                 <span id="theme-icon" class="text-lg">🌙</span>
-            </button>
+            </button> -->
         </div>
 
         <slot />
