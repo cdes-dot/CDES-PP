@@ -1,12 +1,12 @@
 "use client"
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  MapPin, 
-  Calendar, 
-  Users, 
-  Target, 
+import {
+  MapPin,
+  Calendar,
+  Users,
+  Target,
   ArrowRight,
   Building,
   Leaf,
@@ -16,55 +16,32 @@ import {
 } from 'lucide-react'
 
 // Datos de proyectos actuales del CDES (simplificados según la imagen)
-const proyectosActivos = [
-  {
-    id: 1,
-    titulo: "Parque Central Metropolitano",
-    objetivos: "Crear el principal espacio verde y recreativo de Santiago con áreas deportivas, culturales y de esparcimiento.",
-    alcance: "500,000 habitantes beneficiados directamente",
-    instituciones: ["Ayuntamiento de Santiago", "Ministerio de Obras Públicas", "BID"],
-    imagen: "/proyecto-parque.jpg",
-    icono: Leaf,
-    color: "bg-green-500"
-  },
-  {
-    id: 2,
-    titulo: "Sistema de Transporte Público BRT",
-    objetivos: "Implementar un sistema de transporte público rápido y eficiente para mejorar la movilidad urbana.",
-    alcance: "800,000 habitantes con mejor acceso al transporte",
-    instituciones: ["INTRANT", "MOPC", "Banco Mundial"],
-    imagen: "/proyecto-transporte.jpg",
-    icono: Car,
-    color: "bg-blue-500"
-  },
-  {
-    id: 3,
-    titulo: "Centro de Innovación Urbana",
-    objetivos: "Desarrollar un hub tecnológico para soluciones innovadoras y fomento del emprendimiento local.",
-    alcance: "50,000 emprendedores capacitados y apoyados",
-    instituciones: ["PUCMM", "INTEC", "Sector Privado"],
-    imagen: "/proyecto-innovacion.jpg",
-    icono: Building,
-    color: "bg-purple-500"
-  },
-  {
-    id: 4,
-    titulo: "Programa Juventud Emprendedora",
-    objetivos: "Capacitar y apoyar a jóvenes emprendedores con herramientas, financiamiento y mentorías.",
-    alcance: "2,000 jóvenes capacitados anualmente",
-    instituciones: ["Universidades Locales", "Sector Privado", "USAID"],
-    imagen: "/proyecto-juventud.jpg",
-    icono: GraduationCap,
-    color: "bg-orange-500"
-  }
-]
+type Proyecto = {
+  instituciones?: { [key: string]: any }[]; // puede estar ausente o null
+};
 
-export default function ProyectosSection() {
+function contarInstitucionesTotales(proyectos: Proyecto[]): number {
+  return proyectos.reduce((total, proyecto) => {
+    const count = Array.isArray(proyecto.instituciones)
+      ? proyecto.instituciones.length
+      : 0;
+    return total + count;
+  }, 0);
+}
+export default function ProyectosSection({ proyectos }: { proyectos: any[] }) {
+  console.log(proyectos)
+  proyectos.map((proyecto) => {
+    proyecto.Objetivos.map((item: any) => {
+      item.children.map((child: any) => {
+        console.log(child.text)
+      })
+    })
+  })
   return (
     <section className="bg-muted py-16 md:py-32">
       <div className="container mx-auto max-w-7xl px-6">
         {/* Header con Foto */}
-        <div className="text-center mb-16">
+        {/*<div className="text-center mb-16">
           <div className="bg-background rounded-lg border shadow-sm p-8 mb-8">
             <div className="aspect-video overflow-hidden rounded-lg mb-6">
               <img
@@ -84,43 +61,53 @@ export default function ProyectosSection() {
               mejorar la ciudad de Santiago
             </p>
           </div>
-        </div>
+        </div>*/}
 
         {/* Grid de Proyectos - Estructura según imagen */}
         <div className="grid gap-8 lg:grid-cols-2">
-          {proyectosActivos.map((proyecto) => {
+          {proyectos.map((proyecto) => {
             const IconComponent = proyecto.icono
             return (
               <Card key={proyecto.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-4">
-                    {/* Icono del proyecto */}
-                    <div className={`${proyecto.color} p-3 rounded-full text-white flex-shrink-0`}>
-                      <IconComponent className="w-6 h-6" />
-                    </div>
-                    
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold mb-2 font-noto">
-                        {proyecto.titulo}
+                        {proyecto.Titulo}
                       </h3>
                     </div>
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 min-h-[249px]">
                   {/* Objetivos */}
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm text-primary">Objetivos</h4>
-                    <p className="text-muted-foreground text-sm font-inter leading-relaxed">
-                      {proyecto.objetivos}
-                    </p>
+
+                    {
+                      proyecto.Objetivos.map((item: any) => {
+                        return item.children.map((child: any) => {
+                          return (
+                            <p className="text-muted-foreground text-sm font-inter leading-relaxed">
+                              {child.text}
+                            </p>
+                          )
+                        })
+                      })
+                    }
+                    {/*proyecto.objetivos.map((obj: any, index: number) => (
+                      <p className="text-muted-foreground text-sm font-inter leading-relaxed">
+                        {obj}
+                      </p>
+                    ))*/}
+
                   </div>
 
                   {/* Alcance */}
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm text-primary">Alcance</h4>
                     <p className="text-muted-foreground text-sm font-inter">
-                      {proyecto.alcance}
+                      {proyecto.Alcance}
                     </p>
                   </div>
 
@@ -128,25 +115,31 @@ export default function ProyectosSection() {
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm text-primary">Instituciones Involucradas</h4>
                     <div className="flex flex-wrap gap-2">
-                      {proyecto.instituciones.map((institucion, index) => (
+                      {proyecto.instituciones.map((institucion: any, index: number) => (
                         <Badge key={index} variant="secondary" className="text-xs">
-                          {institucion}
+                          {institucion.Nombre}
                         </Badge>
                       ))}
                     </div>
                   </div>
 
-                  {/* Botón Ver Detalles */}
-                  <div className="pt-4 border-t">
-                    <Button 
-                      variant="outline" 
-                      className="w-full hover:bg-primary hover:text-primary-foreground transition-colors"
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      Ver Detalles del Proyecto
-                    </Button>
-                  </div>
                 </CardContent>
+                <CardFooter>
+                  {/* Botón Ver Detalles */}
+                  <div className="pt-4 border-t w-full">
+                    <a href={`/proyecto/${proyecto.documentId}`} className="w-full">
+
+
+                      <Button
+                        variant="outline"
+                        className="w-full hover:bg-primary hover:text-primary-foreground transition-colors"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        Ver Detalles del Proyecto
+                      </Button>
+                    </a>
+                  </div>
+                </CardFooter>
               </Card>
             )
           })}
@@ -158,10 +151,10 @@ export default function ProyectosSection() {
             <h3 className="text-2xl font-semibold font-playfair">
               Impacto en el Desarrollo de Santiago
             </h3>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">4</div>
+                <div className="text-3xl font-bold text-primary mb-2">{proyectos.length}</div>
                 <div className="text-sm text-muted-foreground">Proyectos Estratégicos</div>
               </div>
               <div className="text-center">
@@ -173,7 +166,7 @@ export default function ProyectosSection() {
                 <div className="text-sm text-muted-foreground">Inversión Total</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">15+</div>
+                <div className="text-3xl font-bold text-primary mb-2">{contarInstitucionesTotales(proyectos)}</div>
                 <div className="text-sm text-muted-foreground">Instituciones Aliadas</div>
               </div>
             </div>

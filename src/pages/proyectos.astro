@@ -2,6 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 import ProyectosSection from '@/components/Proyectos';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { getData } from 'lib/fetch';
+
+const { Titulo, Subtitulo, proyectos} = await getData("coleccion-de-proyecto?populate[proyectos][populate]=*");
+console.log(proyectos)
 ---
 
 <Layout>
@@ -10,16 +14,15 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
         <section class="bg-muted py-24">
             <div class="container mx-auto max-w-4xl px-6 text-center">
                 <h1 class="text-5xl font-bold mb-6 font-playfair">
-                    Nuestros Proyectos
+                    {Titulo}
                 </h1>
                 <p class="text-xl text-muted-foreground font-inter">
-                    Transformando Santiago a través de proyectos estratégicos 
-                    que impactan positivamente la vida de nuestros ciudadanos
+                    {Subtitulo}
                 </p>
             </div>
         </section>
 
         <!-- Sección de proyectos -->
-        <ProyectosSection client:load />
+        <ProyectosSection proyectos={proyectos} client:load />
     </main>
 </Layout>

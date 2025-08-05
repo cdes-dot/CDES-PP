@@ -1,0 +1,89 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getData } from "../../../lib/fetch";
+import { ArrowLeft, User, Calendar, Volume2 } from "lucide-react";
+export const prerender = false;
+const { id } = Astro.params;
+console.log(id);
+const proyecto = await getData("proyectos/" + id + "?populate=*");
+console.log(proyecto);
+export async function getStaticPaths() {
+    const proyectos = await getData("proyectos");
+
+    console.log(proyectos);
+    return proyectos.map((item: any) => ({
+        params: { id: item.documentId },
+    }));
+}
+---
+
+<Layout>
+    <main class="min-h-screen bg-background py-16">
+        <div class="container mx-auto max-w-4xl px-6">
+            <!-- Botón volver -->
+            <div class="mb-8">
+                <a
+                    href="/proyectos"
+                    class="inline-flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Volver a proyectos</span>
+                </a>
+            </div>
+
+            <!-- Imagen destacada -->
+            {
+                proyecto.Portada && (
+                    <div class="aspect-video overflow-hidden rounded-lg mb-8">
+                        <img
+                            src={proyecto.Portada.url}
+                            alt={proyecto.Titulo}
+                            class="w-full h-full object-cover"
+                        />
+                    </div>
+                )
+            }
+
+            <!-- Contenido del artículo -->
+            <article class="prose prose-lg max-w-none">
+                <!-- Título -->
+                <h1
+                    id="article-title"
+                    class="text-4xl font-bold mb-6 font-playfair"
+                >
+                    {proyecto.Titulo}
+                </h1>
+
+                <!-- Descripción/Lead -->
+                <div
+                    id="article-description"
+                    class="text-xl text-muted-foreground mb-8 font-inter leading-relaxed"
+                >
+                    {proyecto.Objetivos[0].children[0].text}
+                </div>
+
+                <!-- Contenido principal -->
+                <div id="article-content" class="font-inter">
+                    {
+                        Array.isArray(proyecto.Descripcion) &&
+                            proyecto.Descripcion.map((paragraph: any) => {
+                                return paragraph.children.map((item: any) => (
+                                    <p class="text-muted-foreground mb-4">
+                                        {item.text}
+                                    </p>
+                                ));
+                            })
+                    }
+                </div>
+
+                <div id="article-content" class="font-inter">
+                    <p class="text-muted-foreground mb-4">
+                      Alcance: {proyecto.Alcance}
+                    </p>
+                </div>
+            </article>
+
+            <!-- Compartir (opcional) -->
+        </div>
+    </main>
+</Layout>
