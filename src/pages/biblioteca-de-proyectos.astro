@@ -1,0 +1,11 @@
+---
+import ProyectosSection from "@/components/Proyectos";
+import TodosProyectos from "@/components/todos-proyectos";
+import Layout from "@/layouts/Layout.astro";
+import { getData } from "lib/fetch";
+
+---
+
+<Layout>
+   <TodosProyectos client:only/>
+</Layout>

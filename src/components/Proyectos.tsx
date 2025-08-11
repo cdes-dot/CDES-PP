@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Eye
 } from 'lucide-react'
+import { Resumen } from './resumen'
 
 // Datos de proyectos actuales del CDES (simplificados según la imagen)
 type Proyecto = {
@@ -28,7 +29,7 @@ function contarInstitucionesTotales(proyectos: Proyecto[]): number {
     return total + count;
   }, 0);
 }
-export default function ProyectosSection({ proyectos }: { proyectos: any[] }) {
+export default function ProyectosSection({ proyectos, children }: { proyectos: any[], children?: React.ReactNode }) {
   console.log(proyectos)
   proyectos.map((proyecto) => {
     proyecto.Objetivos.map((item: any) => {
@@ -146,42 +147,7 @@ export default function ProyectosSection({ proyectos }: { proyectos: any[] }) {
         </div>
 
         {/* Footer Section */}
-        <div className="mt-16 bg-background rounded-lg border shadow-sm p-8">
-          <div className="text-center space-y-6">
-            <h3 className="text-2xl font-semibold font-playfair">
-              Impacto en el Desarrollo de Santiago
-            </h3>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">{proyectos.length}</div>
-                <div className="text-sm text-muted-foreground">Proyectos Estratégicos</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">1.3M+</div>
-                <div className="text-sm text-muted-foreground">Ciudadanos Beneficiados</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">RD$ 11B</div>
-                <div className="text-sm text-muted-foreground">Inversión Total</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">{contarInstitucionesTotales(proyectos)}</div>
-                <div className="text-sm text-muted-foreground">Instituciones Aliadas</div>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-              <Button size="lg">
-                Ver Todos los Proyectos
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              <Button variant="outline" size="lg">
-                Únete como Aliado Estratégico
-              </Button>
-            </div>
-          </div>
-        </div>
+        {children}
       </div>
     </section>
   )

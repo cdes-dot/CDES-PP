@@ -126,7 +126,7 @@ export default function BibliotecaSearch() {
         <div className="container mx-auto p-4">
             <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">Biblioteca Digital</h1>
             
-            <div className="bg-background shadow-lg rounded-lg p-6 mb-8">
+            <div className="bg-transparent shadow-lg rounded-lg p-6 mb-8">
                 <div className="flex flex-col md:flex-row gap-4 items-center">
                     <div className="relative flex-grow w-full">
                         <Input 

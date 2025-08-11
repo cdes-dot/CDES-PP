@@ -6,11 +6,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "search": "node ./scripts/index-meilisearch.js"
   },
   "dependencies": {
     "@astrojs/react": "^4.3.0",
     "@astrojs/vercel": "^8.2.0",
+    "@justinribeiro/lite-youtube": "^1.8.2",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.5",

@@ -1,11 +1,22 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ProyectosSection from '@/components/Proyectos';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { getData } from 'lib/fetch';
+import Layout from "../layouts/Layout.astro";
+import ProyectosSection from "@/components/Proyectos";
+import { Resumen } from "@/components/resumen";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getData } from "lib/fetch";
 
-const { Titulo, Subtitulo, proyectos} = await getData("coleccion-de-proyecto?populate[proyectos][populate]=*");
-console.log(proyectos)
+const { Titulo, Subtitulo, proyectos } = await getData(
+    "coleccion-de-proyecto?populate[proyectos][populate]=*",
+);
+console.log(proyectos);
+function contarInstitucionesTotales(proyectos: any): number {
+  return proyectos.reduce((total: any, proyecto: any) => {
+    const count = Array.isArray(proyecto.instituciones)
+      ? proyecto.instituciones.length
+      : 0;
+    return total + count;
+  }, 0);
+}
 ---
 
 <Layout>
@@ -23,6 +34,11 @@ console.log(proyectos)
         </section>
 
         <!-- Sección de proyectos -->
-        <ProyectosSection proyectos={proyectos} client:load />
+        <ProyectosSection proyectos={proyectos} client:load>
+            <Resumen
+                length={proyectos.length}
+                instituciones={contarInstitucionesTotales(proyectos)}
+            />
+        </ProyectosSection>
     </main>
 </Layout>

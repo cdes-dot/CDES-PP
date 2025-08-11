@@ -5,7 +5,7 @@ export function Menu({ menuItems, logo }: { menuItems: any[]; logo: string }) {
   const [menuState, setMenuState] = useState(false);
 
   return (
-    <header>
+    <header className="w-full">
       <nav
         data-state={menuState && "active"}
         className="fixed z-20 w-full border-b border-dashed bg-white backdrop-blur md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent"

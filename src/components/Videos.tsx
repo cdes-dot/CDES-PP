@@ -7,7 +7,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Pause, Play } from "lucide-react";
-import { use, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 
 export default function CarouselVideos() {
   const [playingVideo, setPlayingVideo] = useState<number | null>(null);
@@ -64,7 +64,7 @@ export default function CarouselVideos() {
           {data.Videos.map((video: any) => (
             <CarouselItem
               key={video.documentId}
-              className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3"
+              className=""
             >
               <Card className="overflow-hidden">
                 <CardContent className="p-0">
