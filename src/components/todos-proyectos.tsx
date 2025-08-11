@@ -72,7 +72,7 @@ const TodosProyectos = ({ }: {}) => {
                                 {loading ? "Buscando..." : "Buscar"}
                             </Button>
                         </form>
-                        <div className="grid grid-cols-3 mx-auto gap-3">
+                        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 mx-auto gap-3">
                             {resultados.map(proyecto => (
                                 <Card key={proyecto.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                                     <CardHeader className="pb-4">

@@ -17,6 +17,12 @@ function contarInstitucionesTotales(proyectos: any): number {
     return total + count;
   }, 0);
 }
+
+function filtrarProyectosNoCompletados(proyectos: any[]): any[] {
+  return proyectos.filter((proyecto: any) => proyecto.Completado != true);
+}
+const proyectosNoCompletados = filtrarProyectosNoCompletados(proyectos);
+console.log("Completados:",proyectosNoCompletados)
 ---
 
 <Layout>
@@ -34,10 +40,10 @@ function contarInstitucionesTotales(proyectos: any): number {
         </section>
 
         <!-- Sección de proyectos -->
-        <ProyectosSection proyectos={proyectos} client:load>
+        <ProyectosSection proyectos={proyectosNoCompletados} client:load>
             <Resumen
-                length={proyectos.length}
-                instituciones={contarInstitucionesTotales(proyectos)}
+                length={proyectosNoCompletados.length}
+                instituciones={contarInstitucionesTotales(proyectosNoCompletados)}
             />
         </ProyectosSection>
     </main>
