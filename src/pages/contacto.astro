@@ -3,55 +3,138 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-
+export const prerender = false;
 import { Button } from "@/components/ui/button";
 import Layout from "@/layouts/Layout.astro";
+
+const contactRequest = await fetch(
+    `${import.meta.env.PUBLIC_STRAPI_URL}/api/contacto?populate[Contacto][populate]=*`,
+    {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+        },
+    },
+);
+const request = await fetch(
+    `${import.meta.env.PUBLIC_STRAPI_URL}/api/contacto?populate=*`,
+    {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+        },
+    },
+);
+const response = await request.json();
+const { Titulo, Subtitulo, Contactos } = response.data;
+const contactResponse = await contactRequest.json();
+console.log(Contactos);
+const { data } = contactResponse;
 ---
 
 <Layout>
+    <script type="module">
+        const form = document.getElementById("form");
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const name = form.querySelector("#name").value.trim();
+            const email = form.querySelector("#email").value.trim();
+            const phone = form.querySelector("#phone").value.trim();
+            const msg = form.querySelector("#msg").value.trim();
+
+            if (!name || !email || !phone || !msg) {
+                alert("Por favor llena todos los campos");
+                return;
+            }
+
+            const body = { name, email, phone, message: msg };
+
+            try {
+                const res = await fetch("/api/contacto", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    alert("Mensaje enviado con éxito 🎉");
+                    form.reset();
+                } else {
+                    alert(
+                        "Error: " +
+                            (data.error || "No se pudo enviar el mensaje"),
+                    );
+                }
+            } catch (error) {
+                alert("Error al enviar: " + error.message);
+            }
+        });
+    </script>
+
     <section class="bg-muted py-15 sm:py-24 lg:py-32">
         <div class="mx-auto max-w-4xl px-4 lg:px-0">
             <h1 class="text-4xl font-semibold lg:text-5xl">
-                Ayúdanos a dirigir tu consulta
+                {Titulo}
             </h1>
             <p class="text-muted-foreground mt-4 text-lg">
-                Te ayudaremos a encontrar el plan y precio adecuado para tu
-                negocio.
+                {Subtitulo}
             </p>
             <div class="mt-12 grid gap-12 lg:grid-cols-5">
-                <div class="grid grid-cols-2 lg:col-span-2 lg:block lg:space-y-12">
+                <div
+                    class="grid grid-cols-2 lg:col-span-2 lg:block lg:space-y-12"
+                >
                     <div class="flex flex-col justify-between space-y-6">
-                        <div>
-                            <h2 class="mb-3 text-lg font-semibold">
-                                Colaborar
-                            </h2>
-                            <a
-                                href="mailto:cdescomunica@cdes.do"
-                                class="text-primary text-lg hover:underline"
-                            >
-                                cdescomunica@cdes.do
-                            </a>
-                            <p class="mt-3 text-sm">809-582-0335</p>
-                        </div>
+                        {
+                            Contactos.map(
+                                (item: {
+                                    Titulo: string;
+                                    Email: string;
+                                    Telefono: string;
+                                }) => (
+                                    <div>
+                                        <h2 class="mb-3 text-lg font-semibold">
+                                            {item.Titulo}
+                                        </h2>
+                                        <a
+                                            href="mailto:cdescomunica@cdes.do"
+                                            class="text-primary text-lg hover:underline"
+                                        >
+                                            {item.Email}
+                                        </a>
+                                        <p class="mt-3 text-sm">
+                                            {item.Telefono}
+                                        </p>
+                                    </div>
+                                ),
+                            )
+                        }
+
                         <!-- Mapa visible solo en desktop -->
                         <div class="hidden lg:block">
-                            <h3 class="mb-4 text-lg font-semibold">Nuestra Ubicación</h3>
-                            <div class="w-full rounded-lg overflow-hidden shadow-lg">
-                                <iframe 
-                                    class="w-full h-130" 
-                                    frameborder="0" 
-                                    scrolling="no" 
-                                    marginheight="0" 
-                                    marginwidth="0" 
-                                    src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=Av%20Las%20Carreras%207,%20Santiago%20de%20los%20Caballeros%2051000+(Consejo%20para%20el%20Desarrollo%20Estrat%C3%A9gico%20de%20Santiago)&amp;t=&amp;z=17&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
+                            <h3 class="mb-4 text-lg font-semibold">
+                                Nuestra Ubicación
+                            </h3>
+                            <div
+                                class="w-full rounded-lg overflow-hidden shadow-lg"
+                            >
+                                <iframe
+                                    class="w-full h-130"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    marginheight="0"
+                                    marginwidth="0"
+                                    src="https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Av%20Las%20Carreras%207,%20Santiago%20de%20los%20Caballeros%2051000+(Consejo%20para%20el%20Desarrollo%20Estrat%C3%A9gico%20de%20Santiago)&t=&z=17&ie=UTF8&iwloc=B&output=embed"
                                 >
-                                    <a href="https://www.mapsdirections.info/fr/calculer-la-population-sur-une-carte">
-                                        Estimer la population sur la carte
-                                    </a>
                                 </iframe>
                             </div>
                             <p class="mt-2 text-sm text-muted-foreground">
-                                Segundo Nivel, Edificio Empresarial, Av Las Carreras 7, Santiago de los Caballeros 51000
+                                Segundo Nivel, Edificio Empresarial, Av Las
+                                Carreras 7, Santiago de los Caballeros 51000
                             </p>
                             <p class="mt-5 text-sm text-muted-foreground">
                                 Lunes - Viernes: 8:30 AM - 5:00 PM
@@ -59,31 +142,30 @@ import Layout from "@/layouts/Layout.astro";
                         </div>
                     </div>
                 </div>
-                <form action="" class="@container lg:col-span-3">
+                <form
+                    id="form"
+                    action="/api/contacto"
+                    method="post"
+                    class="@container lg:col-span-3"
+                >
                     <Card className="p-8 sm:p-12">
                         <h3 class="text-xl font-semibold">
                             Vamos a dirigirte al lugar correcto
                         </h3>
-                        <p class="mt-4 text-sm">
-                            ¡Contacta a nuestro equipo de ventas! Nos encantaría
-                            saber más sobre cómo planeas usar nuestra
-                            aplicación.
-                        </p>
+                        <p class="mt-4 text-sm">¡Contacta a nuestra oficina!</p>
 
                         <div
                             class="**:[&>label]:block mt-12 space-y-6 *:space-y-3"
                         >
-                                <div>
-                                    <Label htmlFor="name">
-                                        Nombre completo
-                                    </Label>
-                                    <Input type="text" id="name" required />
-                                </div>
                             <div>
-                                    <Label htmlFor="email"
-                                        >Correo electrónico de trabajo</Label
-                                    >
-                                    <Input type="email" id="email" required />
+                                <Label htmlFor="name"> Nombre completo </Label>
+                                <Input type="text" id="name" required />
+                            </div>
+                            <div>
+                                <Label htmlFor="email"
+                                    >Correo electrónico de trabajo</Label
+                                >
+                                <Input type="email" id="email" required />
                             </div>
                             <div>
                                 <Label htmlFor="phone">Número de teléfono</Label
@@ -101,29 +183,26 @@ import Layout from "@/layouts/Layout.astro";
             </div>
         </div>
         <!-- NUEVO: Mapa visible solo en mobile/tablet -->
-            <div class="mt-12 lg:hidden">
-                <h2 class="mb-6 text-2xl font-semibold">Nuestra Ubicación</h2>
-                <div class="w-full rounded-lg overflow-hidden shadow-lg">
-                    <iframe 
-                        class="w-full h-64 sm:h-80" 
-                        frameborder="0" 
-                        scrolling="no" 
-                        marginheight="0" 
-                        marginwidth="0" 
-                        src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=Av%20Las%20Carreras%207,%20Santiago%20de%20los%20Caballeros%2051000+(Consejo%20para%20el%20Desarrollo%20Estrat%C3%A9gico%20de%20Santiago)&amp;t=&amp;z=17&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
-                    >
-                        <a href="https://www.mapsdirections.info/fr/calculer-la-population-sur-une-carte">
-                            Estimer la population sur la carte
-                        </a>
-                    </iframe>
-                </div>
-                <p class="mt-4 text-sm text-muted-foreground">
-                    Segundo Nivel, Edificio Empresarial, Av Las Carreras 7, Santiago de los Caballeros 51000
-                </p>
-                <p class="mt-5 text-sm text-muted-foreground">
-                    Lunes - Viernes: 8:30 AM - 5:00 PM
-                </p>
+        <div class="mt-12 lg:hidden">
+            <h2 class="mb-6 text-2xl font-semibold">Nuestra Ubicación</h2>
+            <div class="w-full rounded-lg overflow-hidden shadow-lg">
+                <iframe
+                    class="w-full h-64 sm:h-80"
+                    frameborder="0"
+                    scrolling="no"
+                    marginheight="0"
+                    marginwidth="0"
+                    src="https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Av%20Las%20Carreras%207,%20Santiago%20de%20los%20Caballeros%2051000+(Consejo%20para%20el%20Desarrollo%20Estrat%C3%A9gico%20de%20Santiago)&t=&z=17&ie=UTF8&iwloc=B&output=embed"
+                >
+                </iframe>
             </div>
+            <p class="mt-4 text-sm text-muted-foreground">
+                Segundo Nivel, Edificio Empresarial, Av Las Carreras 7, Santiago
+                de los Caballeros 51000
+            </p>
+            <p class="mt-5 text-sm text-muted-foreground">
+                Lunes - Viernes: 8:30 AM - 5:00 PM
+            </p>
         </div>
     </section>
 </Layout>
