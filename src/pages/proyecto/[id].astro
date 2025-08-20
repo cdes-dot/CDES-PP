@@ -4,13 +4,10 @@ import { getData } from "../../../lib/fetch";
 import { ArrowLeft, User, Calendar, Volume2 } from "lucide-react";
 export const prerender = false;
 const { id } = Astro.params;
-console.log(id);
 const proyecto = await getData("proyectos/" + id + "?populate=*");
-console.log(proyecto);
 export async function getStaticPaths() {
     const proyectos = await getData("proyectos");
 
-    console.log(proyectos);
     return proyectos.map((item: any) => ({
         params: { id: item.documentId },
     }));
@@ -78,7 +75,7 @@ export async function getStaticPaths() {
 
                 <div id="article-content" class="font-inter">
                     <p class="text-muted-foreground mb-4">
-                      Alcance: {proyecto.Alcance}
+                        Alcance: {proyecto.Alcance}
                     </p>
                 </div>
             </article>

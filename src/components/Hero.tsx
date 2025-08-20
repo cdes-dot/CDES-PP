@@ -76,8 +76,7 @@ export default function HeroSection({ slides }: { slides: any[] }) {
             </div>
             <div className="absolute inset-0 z-0 -mx-4 rounded-3xl p-3 lg:col-span-3 w-screen">
               <div className="relative overflow-hidden rounded-3xl w-screen">
-                <div className="bg-radial-[at_75%_25%] to-background z-10 absolute -inset-0 from-12% to-40% w-screen">
-                </div>
+                <div className="bg-radial-[at_75%_25%] to-background z-10 absolute -inset-0 from-12% to-40% w-screen"></div>
 
                 {/* Slider Container */}
                 <div

@@ -25,10 +25,8 @@ const global = await fetch(
 
 const { Titulo, Descripcion, Icono } = (await global.json()).data;
 const { Paginas, Logo } = menu.data;
-console.log(`${import.meta.env.PUBLIC_STRAPI_URL}${Icono.url}`);
+// console.log(`${import.meta.env.PUBLIC_STRAPI_URL}${Icono.url}`);
 ---
-
- 
 
 <html lang="es">
     <head>

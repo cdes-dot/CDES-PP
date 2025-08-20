@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { getData } from 'lib/fetch';
 export const prerender = false
-import { Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, User, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
 // Obtener parámetros de la URL
 const url = new URL(Astro.request.url);
@@ -19,34 +19,41 @@ const startIndex = (currentPage - 1) * itemsPerPage;
 const endIndex = startIndex + itemsPerPage;
 const currentNews = data.slice(startIndex, endIndex);
 
-// Generar números de página para mostrar
-const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
+// Generar números de página para mostrar con puntos suspensivos
+const getPaginationItems = () => {
+    const items = [];
+    const delta = 2; // Páginas a mostrar alrededor de la actual
 
-    if (totalPages <= maxVisiblePages) {
-        for (let i = 1; i <= totalPages; i++) {
-            pages.push(i);
-        }
-    } else {
-        let start = Math.max(1, currentPage - 2);
-        let end = Math.min(totalPages, currentPage + 2);
+    // Siempre mostrar la primera página
+    items.push(1);
 
-        if (currentPage <= 3) {
-            end = maxVisiblePages;
-        } else if (currentPage >= totalPages - 2) {
-            start = totalPages - maxVisiblePages + 1;
-        }
+    if (currentPage > delta + 2) {
+        items.push('ellipsis');
+    }
 
-        for (let i = start; i <= end; i++) {
-            pages.push(i);
+    // Páginas alrededor de la actual
+    const start = Math.max(2, currentPage - delta);
+    const end = Math.min(totalPages - 1, currentPage + delta);
+
+    for (let i = start; i <= end; i++) {
+        if (!items.includes(i)) {
+            items.push(i);
         }
     }
 
-    return pages;
+    if (currentPage < totalPages - delta - 1) {
+        items.push('ellipsis');
+    }
+
+    // Siempre mostrar la última página (si hay más de 1)
+    if (totalPages > 1 && !items.includes(totalPages)) {
+        items.push(totalPages);
+    }
+
+    return items;
 };
 
-const pageNumbers = getPageNumbers();
+const paginationItems = getPaginationItems();
 ---
 
 <Layout>
@@ -61,7 +68,7 @@ const pageNumbers = getPageNumbers();
                     Mantente al día con las últimas noticias del Consejo para el Desarrollo Estratégico de Santiago
                 </p>
                 <p class="text-sm text-muted-foreground mt-2">
-                    Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} noticias
+                    Página {currentPage} de {totalPages} • Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} noticias
                 </p>
             </div>
 
@@ -132,60 +139,93 @@ const pageNumbers = getPageNumbers();
                 ))}
             </div>
 
-            <!-- Paginación -->
+            <!-- Paginación Mejorada -->
             {totalPages > 1 && (
-                <nav class="flex justify-center items-center space-x-2">
-                    <!-- Botón Anterior -->
-                    {currentPage > 1 ? (
-                        <a
-                            href={`/noticias?page=${currentPage - 1}`}
-                            class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-                        >
-                            <ChevronLeft className="w-4 h-4 mr-1" />
-                            Anterior
-                        </a>
-                    ) : (
-                        <span class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground/50 bg-background border border-border rounded-md cursor-not-allowed">
-                            <ChevronLeft className="w-4 h-4 mr-1" />
-                            Anterior
-                        </span>
-                    )}
-
-                    <!-- Números de página -->
-                    <div class="flex space-x-1">
-                        {pageNumbers.map((pageNum) => (
-                            pageNum === currentPage ? (
-                                <span class="px-3 py-2 text-sm font-medium text-primary-foreground bg-primary border border-primary rounded-md">
-                                    {pageNum}
-                                </span>
-                            ) : (
-                                <a
-                                    href={`/noticias?page=${pageNum}`}
-                                    class="px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-                                >
-                                    {pageNum}
-                                </a>
-                            )
-                        ))}
+                <nav class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-2">
+                    <!-- Información de página en móvil -->
+                    <div class="sm:hidden text-sm text-muted-foreground mb-4">
+                        Página {currentPage} de {totalPages}
                     </div>
 
-                    <!-- Botón Siguiente -->
-                    {currentPage < totalPages ? (
-                        <a
-                            href={`/noticias?page=${currentPage + 1}`}
-                            class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-                        >
-                            Siguiente
-                            <ChevronRight className="w-4 h-4 ml-1" />
-                        </a>
-                    ) : (
-                        <span class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground/50 bg-background border border-border rounded-md cursor-not-allowed">
-                            Siguiente
-                            <ChevronRight className="w-4 h-4 ml-1" />
-                        </span>
-                    )}
+                    <div class="flex items-center space-x-1">
+                        <!-- Botón Anterior -->
+                        {currentPage > 1 ? (
+                            <a
+                                href={`/noticias?page=${currentPage - 1}`}
+                                class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                            >
+                                <ChevronLeft className="w-4 h-4 mr-1" />
+                                <span class="hidden sm:inline">Anterior</span>
+                            </a>
+                        ) : (
+                            <span class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground/50 bg-background border border-border rounded-md cursor-not-allowed">
+                                <ChevronLeft className="w-4 h-4 mr-1" />
+                                <span class="hidden sm:inline">Anterior</span>
+                            </span>
+                        )}
+
+                        <!-- Números de página con puntos suspensivos -->
+                        <div class="flex space-x-1">
+                            {paginationItems.map((item, index) => (
+                                item === 'ellipsis' ? (
+                                    <span  class="px-3 py-2 text-sm font-medium text-muted-foreground">
+                                        <MoreHorizontal className="w-4 h-4" />
+                                    </span>
+                                ) : item === currentPage ? (
+                                    <span  class="px-3 py-2 text-sm font-medium text-primary-foreground bg-primary border border-primary rounded-md">
+                                        {item}
+                                    </span>
+                                ) : (
+                                    <a
+                                        href={`/noticias?page=${item}`}
+                                        class="px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                                    >
+                                        {item}
+                                    </a>
+                                )
+                            ))}
+                        </div>
+
+                        <!-- Botón Siguiente -->
+                        {currentPage < totalPages ? (
+                            <a
+                                href={`/noticias?page=${currentPage + 1}`}
+                                class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                            >
+                                <span class="hidden sm:inline">Siguiente</span>
+                                <ChevronRight className="w-4 h-4 ml-1" />
+                            </a>
+                        ) : (
+                            <span class="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground/50 bg-background border border-border rounded-md cursor-not-allowed">
+                                <span class="hidden sm:inline">Siguiente</span>
+                                <ChevronRight className="w-4 h-4 ml-1" />
+                            </span>
+                        )}
+                    </div>
+
+                    <!-- Navegación rápida -->
+                    <div class="flex items-center space-x-2 text-sm">
+                        {currentPage > 3 && (
+                            <a
+                                href="/noticias?page=1"
+                                class="text-primary hover:text-primary/80 transition-colors"
+                            >
+                                ← Primera
+                            </a>
+                        )}
+                        {currentPage < totalPages - 2 && (
+                            <a
+                                href={`/noticias?page=${totalPages}`}
+                                class="text-primary hover:text-primary/80 transition-colors"
+                            >
+                                Última →
+                            </a>
+                        )}
+                    </div>
                 </nav>
             )}
         </div>
     </main>
 </Layout>
+```
+ 

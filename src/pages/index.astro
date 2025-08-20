@@ -8,9 +8,9 @@ import CarouselVideos from "@/components/Videos";
 import InfographySection from "@/components/astro/InfographySection.astro";
 import { getData } from "lib/fetch";
 const { Carrousel, Destacados, Plan } = await getData(
-    "pagina-principal?populate[Carrousel][populate]=*&populate[Destacados][populate][articulos][populate]=*&populate[Plan][populate]=*"
+    "pagina-principal?populate[Carrousel][populate]=*&populate[Destacados][populate][articulos][populate]=*&populate[Plan][populate]=*",
 );
-console.log(Plan);
+console.log(Carrousel);
 ---
 
 <Layout>

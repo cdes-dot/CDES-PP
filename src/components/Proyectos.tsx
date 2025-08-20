@@ -1,7 +1,12 @@
-"use client"
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+"use client";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   MapPin,
   Calendar,
@@ -12,9 +17,9 @@ import {
   Leaf,
   Car,
   GraduationCap,
-  Eye
-} from 'lucide-react'
-import { Resumen } from './resumen'
+  Eye,
+} from "lucide-react";
+import { Resumen } from "./resumen";
 
 // Datos de proyectos actuales del CDES (simplificados según la imagen)
 type Proyecto = {
@@ -29,15 +34,21 @@ function contarInstitucionesTotales(proyectos: Proyecto[]): number {
     return total + count;
   }, 0);
 }
-export default function ProyectosSection({ proyectos, children }: { proyectos: any[], children?: React.ReactNode }) {
-  console.log(proyectos)
+export default function ProyectosSection({
+  proyectos,
+  children,
+}: {
+  proyectos: any[];
+  children?: React.ReactNode;
+}) {
+  // console.log(proyectos)
   proyectos.map((proyecto) => {
     proyecto.Objetivos.map((item: any) => {
       item.children.map((child: any) => {
-        console.log(child.text)
-      })
-    })
-  })
+        console.log(child.text);
+      });
+    });
+  });
   return (
     <section className="bg-muted py-16 md:py-32">
       <div className="container mx-auto max-w-7xl px-6">
@@ -58,7 +69,7 @@ export default function ProyectosSection({ proyectos, children }: { proyectos: a
               Proyectos en Desarrollo
             </h2>
             <p className="text-muted-foreground text-lg font-inter max-w-4xl mx-auto">
-              Profundizar más la importancia de CDES en los proyectos actualmente en desarrollo para 
+              Profundizar más la importancia de CDES en los proyectos actualmente en desarrollo para
               mejorar la ciudad de Santiago
             </p>
           </div>
@@ -67,9 +78,12 @@ export default function ProyectosSection({ proyectos, children }: { proyectos: a
         {/* Grid de Proyectos - Estructura según imagen */}
         <div className="grid gap-8 lg:grid-cols-2">
           {proyectos.map((proyecto) => {
-            const IconComponent = proyecto.icono
+            const IconComponent = proyecto.icono;
             return (
-              <Card key={proyecto.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              <Card
+                key={proyecto.id}
+                className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
+              >
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-4">
                     <div className="flex-1">
@@ -83,30 +97,31 @@ export default function ProyectosSection({ proyectos, children }: { proyectos: a
                 <CardContent className="space-y-6 min-h-[249px]">
                   {/* Objetivos */}
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-primary">Objetivos</h4>
+                    <h4 className="font-semibold text-sm text-primary">
+                      Objetivos
+                    </h4>
 
-                    {
-                      proyecto.Objetivos.map((item: any) => {
-                        return item.children.map((child: any) => {
-                          return (
-                            <p className="text-muted-foreground text-sm font-inter leading-relaxed">
-                              {child.text}
-                            </p>
-                          )
-                        })
-                      })
-                    }
+                    {proyecto.Objetivos.map((item: any) => {
+                      return item.children.map((child: any) => {
+                        return (
+                          <p className="text-muted-foreground text-sm font-inter leading-relaxed">
+                            {child.text}
+                          </p>
+                        );
+                      });
+                    })}
                     {/*proyecto.objetivos.map((obj: any, index: number) => (
                       <p className="text-muted-foreground text-sm font-inter leading-relaxed">
                         {obj}
                       </p>
                     ))*/}
-
                   </div>
 
                   {/* Alcance */}
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-primary">Alcance</h4>
+                    <h4 className="font-semibold text-sm text-primary">
+                      Alcance
+                    </h4>
                     <p className="text-muted-foreground text-sm font-inter">
                       {proyecto.Alcance}
                     </p>
@@ -114,23 +129,31 @@ export default function ProyectosSection({ proyectos, children }: { proyectos: a
 
                   {/* Instituciones Involucradas */}
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-primary">Instituciones Involucradas</h4>
+                    <h4 className="font-semibold text-sm text-primary">
+                      Instituciones Involucradas
+                    </h4>
                     <div className="flex flex-wrap gap-2">
-                      {proyecto.instituciones.map((institucion: any, index: number) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {institucion.Nombre}
-                        </Badge>
-                      ))}
+                      {proyecto.instituciones.map(
+                        (institucion: any, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {institucion.Nombre}
+                          </Badge>
+                        ),
+                      )}
                     </div>
                   </div>
-
                 </CardContent>
                 <CardFooter>
                   {/* Botón Ver Detalles */}
                   <div className="pt-4 border-t w-full">
-                    <a href={`/proyecto/${proyecto.documentId}`} className="w-full">
-
-
+                    <a
+                      href={`/proyecto/${proyecto.documentId}`}
+                      className="w-full"
+                    >
                       <Button
                         variant="outline"
                         className="w-full hover:bg-primary hover:text-primary-foreground transition-colors"
@@ -142,7 +165,7 @@ export default function ProyectosSection({ proyectos, children }: { proyectos: a
                   </div>
                 </CardFooter>
               </Card>
-            )
+            );
           })}
         </div>
 
@@ -150,5 +173,5 @@ export default function ProyectosSection({ proyectos, children }: { proyectos: a
         {children}
       </div>
     </section>
-  )
+  );
 }

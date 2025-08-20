@@ -4,9 +4,7 @@ import Layout from "../../layouts/Layout.astro";
 import { Calendar, User, ArrowLeft, Volume2 } from "lucide-react";
 export const prerender = false;
 const { id } = Astro.params;
-console.log(id);
 const noticia = await getData("articulos/" + id + "?populate=*");
-console.log(noticia);
 export async function getStaticPaths() {
     const noticias = await getData("articulos");
 
@@ -66,7 +64,7 @@ function formatearFecha(fecha: string, hora: string) {
                 >
                     <div class="flex items-center space-x-2">
                         <User className="w-5 h-5" />
-                        <span class="font-medium">{noticia.autor.Nombre}</span>
+                        <span class="font-medium">{noticia.autor?.Nombre || "CDES"}</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <Calendar className="w-5 h-5" />
