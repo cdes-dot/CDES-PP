@@ -30,7 +30,6 @@ const request = await fetch(
 const response = await request.json();
 const { Titulo, Subtitulo, Contactos } = response.data;
 const contactResponse = await contactRequest.json();
-console.log(Contactos);
 const { data } = contactResponse;
 ---
 

@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "motion/react";
 const { Titulo, Historia, Evento, Infografia, Miembros } = await getData(
     "acerca-de?populate[Evento][populate]=Media&populate[Infografia][populate]=*&populate[Miembros][populate]=*",
 );
-console.log("miebros:",Miembros)
 const miembros = await getData("miembros?populate=*");
 
 // Datos de los miembros del CDES
@@ -66,12 +65,14 @@ const miembros = await getData("miembros?populate=*");
                         Miembros.map((miembro: any) => (
                             <div class="bg-white dark:bg-muted text-gray-500 dark:text-neutral-50 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                                 <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
-                                   {miembro.Portada && <img
-                                        src={miembro.Portada.url}
-                                        alt={`Foto de ${miembro.Nombres}`}
-                                        class="h-110 w-full object-cover object-center"
-                                        onerror="this.src='/miembros/default-avatar.jpg'"
-                                    />}
+                                    {miembro.Portada && (
+                                        <img
+                                            src={miembro.Portada.url}
+                                            alt={`Foto de ${miembro.Nombres}`}
+                                            class="h-110 w-full object-cover object-center"
+                                            onerror="this.src='/miembros/default-avatar.jpg'"
+                                        />
+                                    )}
                                 </div>
                                 <div class="p-6">
                                     <h3 class="text-lg font-semibold  mb-2">

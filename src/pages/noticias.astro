@@ -1,84 +1,92 @@
 ---
+export const prerender = false
+
 import Layout from '../layouts/Layout.astro';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { getData } from 'lib/fetch';
-export const prerender = false
 import { Calendar, User, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import NewsSection from "@/components/News";
 
 // Obtener parámetros de la URL
 const url = new URL(Astro.request.url);
 const currentPage = parseInt(url.searchParams.get('page') || '1');
-const itemsPerPage = 6; // Número de noticias por página
+const itemsPerPage = 9; // Número de noticias por página
 
-const data = await getData("articulos?populate=*");
-
+const [data,meta] = await getData(`articulos?populate=*&pagination[page]=${currentPage}&pagination[pageSize]=9&sort=Creacion:desc`, true);
+const {Encabezado } = await getData("Noticia?populate[Encabezado][populate][articulos][populate]=*")
 // Calcular paginación
 const totalItems = data.length;
-const totalPages = Math.ceil(totalItems / itemsPerPage);
+const totalPages = Math.ceil(meta.pagination.total / itemsPerPage);
 const startIndex = (currentPage - 1) * itemsPerPage;
 const endIndex = startIndex + itemsPerPage;
-const currentNews = data.slice(startIndex, endIndex);
+const currentNews = data;
 
 // Generar números de página para mostrar con puntos suspensivos
+// Generar números de página para mostrar
+// Generar números de página para mostrar
+// Generar números de página para mostrar
 const getPaginationItems = () => {
     const items = [];
-    const delta = 2; // Páginas a mostrar alrededor de la actual
 
-    // Siempre mostrar la primera página
-    items.push(1);
-
-    if (currentPage > delta + 2) {
-        items.push('ellipsis');
-    }
-
-    // Páginas alrededor de la actual
-    const start = Math.max(2, currentPage - delta);
-    const end = Math.min(totalPages - 1, currentPage + delta);
-
-    for (let i = start; i <= end; i++) {
-        if (!items.includes(i)) {
+    // Versión simple para debugging
+    if (totalPages <= 7) {
+        // Mostrar todas las páginas
+        for (let i = 1; i <= totalPages; i++) {
             items.push(i);
         }
-    }
+    } else {
+        // Mostrar 1 ... páginas_centrales ... última
+        items.push(1);
+        if (currentPage > 4) items.push('ellipsis');
 
-    if (currentPage < totalPages - delta - 1) {
-        items.push('ellipsis');
-    }
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(totalPages - 1, currentPage + 1);
 
-    // Siempre mostrar la última página (si hay más de 1)
-    if (totalPages > 1 && !items.includes(totalPages)) {
-        items.push(totalPages);
+        for (let i = start; i <= end; i++) {
+            if (!items.includes(i)) items.push(i);
+        }
+
+        if (currentPage < totalPages - 3) items.push('ellipsis');
+        if (!items.includes(totalPages)) items.push(totalPages);
     }
 
     return items;
 };
+
 
 const paginationItems = getPaginationItems();
 ---
 
 <Layout>
     <main class="min-h-screen bg-background py-16">
-        <div class="container mx-auto max-w-4xl px-6">
+        <div class="mx-auto w-screen px-6">
             <!-- Header -->
             <div class="text-center mb-12">
                 <h1 class="text-4xl font-bold mb-4 font-playfair">
-                    Noticias CDES
+                    {Encabezado.Titulo}
                 </h1>
                 <p class="text-muted-foreground text-lg font-inter">
-                    Mantente al día con las últimas noticias del Consejo para el Desarrollo Estratégico de Santiago
+                    {Encabezado.Subtitulo}
                 </p>
                 <p class="text-sm text-muted-foreground mt-2">
                     Página {currentPage} de {totalPages} • Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} noticias
                 </p>
             </div>
 
+            <NewsSection
+            button={false}
+                news={Encabezado.articulos}
+                title={""}
+                subtitle={""}
+                client:only
+            />
             <!-- Lista vertical de noticias -->
-            <div class="space-y-8 mb-12">
+            <div class="mt-10 space-y-8 mb-12 grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 ">
                 {currentNews.map((noticia: any, index: number) => (
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-0">
-                            <div class="md:col-span-1">
-                                <div class="aspect-video md:aspect-square overflow-hidden">
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 md:max-h-[316px] min-h-[316px]">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+                            <div class="md:col-span-1 md:hidden">
+                                <div class="aspect-video md:aspect-square overflow-hidden h-full">
                                     <img
                                         src={noticia.Portada?.url}
                                         alt={noticia.Titulo}
@@ -91,9 +99,6 @@ const paginationItems = getPaginationItems();
                             <div class="md:col-span-2 p-6">
                                 <!-- Badge de posición -->
                                 <div class="flex items-center mb-3">
-                                    <span class="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
-                                        #{startIndex + index + 1}
-                                    </span>
                                     <div class="ml-auto flex items-center space-x-1 text-xs text-muted-foreground">
                                         <Calendar className="w-4 h-4" />
                                         <span>{noticia.Creacion}</span>
@@ -167,25 +172,26 @@ const paginationItems = getPaginationItems();
                         <!-- Números de página con puntos suspensivos -->
                         <div class="flex space-x-1">
                             {paginationItems.map((item, index) => (
-                                item === 'ellipsis' ? (
-                                    <span  class="px-3 py-2 text-sm font-medium text-muted-foreground">
-                                        <MoreHorizontal className="w-4 h-4" />
-                                    </span>
-                                ) : item === currentPage ? (
-                                    <span  class="px-3 py-2 text-sm font-medium text-primary-foreground bg-primary border border-primary rounded-md">
-                                        {item}
-                                    </span>
-                                ) : (
-                                    <a
-                                        href={`/noticias?page=${item}`}
-                                        class="px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-                                    >
-                                        {item}
-                                    </a>
-                                )
-                            ))}
-                        </div>
+                              item === 'ellipsis' ? (
+                                <span  class="px-3 py-2 text-sm font-medium text-muted-foreground">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </span>
+                              ) : item === currentPage ? (
+                                <span  class="px-3 py-2 text-sm font-medium text-primary-foreground bg-primary border border-primary rounded-md">
+                                  {item}
+                                </span>
+                              ) : (
+                                <a
 
+                                  href={`/noticias?page=${item}`}
+                                  class="px-3 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                                >
+                                  {item}
+                                </a>
+                              )
+                            ))}
+
+                        </div>
                         <!-- Botón Siguiente -->
                         {currentPage < totalPages ? (
                             <a
@@ -228,4 +234,3 @@ const paginationItems = getPaginationItems();
     </main>
 </Layout>
 ```
- 

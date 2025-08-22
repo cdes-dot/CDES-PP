@@ -1,4 +1,5 @@
 ---
+export const prerender = false;
 import HeroSection from "@/components/Hero";
 import NewsSection from "@/components/News";
 import Welcome from "../components/Welcome.astro";
@@ -10,21 +11,25 @@ import { getData } from "lib/fetch";
 const { Carrousel, Destacados, Plan } = await getData(
     "pagina-principal?populate[Carrousel][populate]=*&populate[Destacados][populate][articulos][populate]=*&populate[Plan][populate]=*",
 );
-console.log(Carrousel);
 ---
 
 <Layout>
     <HeroSection slides={Carrousel} client:only />
-    <NewsSection
-        news={Destacados.articulos}
-        title={Destacados.Titulo}
-        subtitle={Destacados.Subtitulo}
-        client:only
-    />
+    <section class="bg-background py-16 dark:bg-transparent">
+        <div class="mx-auto max-w-7xl px-6">
+            <NewsSection
+                news={Destacados.articulos}
+                title={Destacados.Titulo}
+                subtitle={Destacados.Subtitulo}
+                client:only
+            />
+        </div>
+    </section>
     <ContentSection
         title={Plan.Titulo}
         content={Plan.Contenido}
         media={Plan.Media}
+        boton={Plan.Boton}
     />
     <CarouselVideos client:only />
 </Layout>

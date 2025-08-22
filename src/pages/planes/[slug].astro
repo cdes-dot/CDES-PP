@@ -1,0 +1,136 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import type { AnyEntryMap } from "astro:content";
+import { getData } from "lib/fetch";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+    CardAction,
+    CardFooter,
+} from "@/components/ui/card";
+import type { AnyZodObject } from "astro:schema";
+
+const { slug } = Astro.params;
+const plan = await getData(
+    `Planes-estrategicos?filters[Url][$eq]=${slug}&populate[Media][populate]=*&populate[eje_estrategicos][populate]=*&populate[Objetivos][populate]=*`,
+);
+export async function getStaticPaths() {
+    const planes = await getData("Planes-estrategicos?populate=*");
+    return planes.map((plan: any) => ({
+        params: { slug: plan.Url },
+    }));
+}
+---
+
+<Layout>
+    <div class="bg-muted">
+        <section
+            class="scroll-py-16 py-16 md:scroll-py-32 md:py-32 bg-background"
+        >
+            <div class="mx-auto max-w-7xl px-6">
+                <div class="grid gap-y-12 px-2 lg:grid-cols-2 space-x-8">
+                    <div class="text-center lg:text-left space-y-6">
+                        <h1 class="mb-6 text-4xl font-semibold md:text-5xl">
+                            {plan[0].Titulo}
+                        </h1>
+                        <div id="article-content" class="font-inter">
+                            {
+                                plan[0].Contenido.map((paragraph: any) => {
+                                    return paragraph.children.map(
+                                        (item: any) => (
+                                            <p class="text-sm leading-6 text-left">
+                                                {item.text}
+                                            </p>
+                                        ),
+                                    );
+                                })
+                            }
+                        </div>
+                        <div class="flex gap-4 pt-4">
+                            <a href="/proyectos">
+                                <Button variant="outline">
+                                    Ver Proyectos
+                                </Button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <img
+                            src={plan[0].Media.url}
+                            alt="Plan Estratégico Santiago 2030"
+                            class="w-full"
+                        />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Objetivos -->
+        <section class="py-16 md:py-32">
+            <div class="mx-auto max-w-7xl px-6">
+                <h2 class="text-center text-3xl font-semibold mb-12">
+                    Objetivos Estratégicos
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {
+                        plan[0].Objetivos.map((item: any) => (
+                            <div class="bg-background p-6 rounded-lg shadow-sm">
+                                <h3 class="text-xl font-medium mb-4">
+                                    {item.Titulo}
+                                </h3>
+                                <p class="text-muted-foreground">
+                                    {item.Descripcion}
+                                </p>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-background py-16 md:py-32">
+            <div class="mx-auto max-w-7xl px-6">
+                <h2 class="text-center text-3xl font-semibold mb-12">
+                    Proyectos Estratégicos
+                </h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    {
+                        plan[0]["eje_estrategicos"].map((item: any) => (
+                            <Card className="border rounded-lg p-6">
+                                <CardHeader>
+                                    <CardAction className="size-12">
+                                        <img
+                                            src={item.Logo.url}
+                                            class="h-42 w-42"
+                                        />
+                                    </CardAction>
+                                    <CardTitle className="text-xl font-medium mb-4">
+                                        {item.Titulo}
+                                    </CardTitle>
+                                    <CardDescription>
+                                        {item.Descripcion.map(
+                                            (paragraph: any) => {
+                                                return paragraph.children.map(
+                                                    (item: any) => (
+                                                        <p class="text-muted-foreground mb-4">
+                                                            {item.text}
+                                                        </p>
+                                                    ),
+                                                );
+                                            },
+                                        )}
+                                    </CardDescription>
+                                </CardHeader>
+
+                                <CardFooter />
+                            </Card>
+                        ))
+                    }
+                </div>
+            </div>
+        </section>
+    </div>
+</Layout>

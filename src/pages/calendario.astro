@@ -1,10 +1,11 @@
 ---
-export const prerender = false
-import { getData } from 'lib/fetch';
-import Layout from '../layouts/Layout.astro';
-import CalendarApp from '@/components/calendario';
+export const prerender = false;
+import { getData } from "lib/fetch";
+import Layout from "../layouts/Layout.astro";
+import CalendarApp from "@/components/calendario";
 
-const eventos = await getData("actividads")
+const eventos = await getData("actividads");
+console.log(eventos);
 ---
 
 <Layout>
@@ -16,7 +17,8 @@ const eventos = await getData("actividads")
                     Calendario CDES
                 </h1>
                 <p class="text-muted-foreground text-lg font-noto">
-                    Eventos, reuniones y actividades del Consejo para el Desarrollo Estratégico de Santiago
+                    Eventos, reuniones y actividades del Consejo para el
+                    Desarrollo Estratégico de Santiago
                 </p>
             </div>
 
@@ -25,4 +27,3 @@ const eventos = await getData("actividads")
         </div>
     </main>
 </Layout>
-

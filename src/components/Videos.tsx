@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import { Pause, Play } from "lucide-react";
 import { useEffect, useState } from "react";
-import YouTube from 'react-youtube';
+import YouTube from "react-youtube";
 
 export default function CarouselVideos() {
   const [playingVideo, setPlayingVideo] = useState<number | null>(null);
@@ -23,7 +23,7 @@ export default function CarouselVideos() {
         {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+            Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
           },
         },
       );
@@ -32,7 +32,6 @@ export default function CarouselVideos() {
     };
     fetchVideos().then((response) => {
       if (response) {
-        console.log(response)
         setVideos({ Videos: response.data.Contenidos });
       } else {
         console.error("No data found");
@@ -50,7 +49,7 @@ export default function CarouselVideos() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 py-36">
+    <div className="w-full max-w-4xl mx-auto p-6 py-36">
       <h2 className="text-2xl font-bold mb-6 text-center">
         Conócenos mas fondo
       </h2>
@@ -64,31 +63,29 @@ export default function CarouselVideos() {
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {data.Videos.map((video: any) => (
-
             <>
-              {
-                video.__component === "shared.enlace" ? (
-                  <CarouselItem
-                    key={video.documentId}
-                    className="">
-                    <Card className="overflow-hidden min-h-auto">
-                      <CardContent className="p-0 h-auto">
-                        <div className="relative group">
-                          <YouTube videoId={video.Url.substring(video.Url.lastIndexOf("/") + 1)} opts={{
+              {video.__component === "shared.enlace" ? (
+                <CarouselItem key={video.documentId} className="">
+                  <Card className="overflow-hidden min-h-auto">
+                    <CardContent className="p-0 h-auto">
+                      <div className="relative group h-96">
+                        <YouTube
+                          videoId={video.Url.substring(
+                            video.Url.lastIndexOf("/") + 1,
+                          )}
+                          opts={{
                             width: "100%",
                             playerVars: {
                               autoplay: 0,
                             },
-                            
-                          }}/>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </CarouselItem>
-                ) : (<CarouselItem
-                  key={video.documentId}
-                  className=""
-                >
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ) : (
+                <CarouselItem key={video.documentId} className="">
                   <Card className="overflow-hidden">
                     <CardContent className="p-0">
                       <div className="relative group">
@@ -101,21 +98,17 @@ export default function CarouselVideos() {
                           onPlay={() => handleVideoPlay(video.Contenido.id)}
                           onPause={handleVideoPause}
                         >
-                          <source
-                            src={video.Contenido.url}
-                            type="video/mp4"
-                          />
+                          <source src={video.Contenido.url} type="video/mp4" />
                           Tu navegador no soporta el elemento video.
                         </video>
                       </div>
                     </CardContent>
                   </Card>
-                </CarouselItem>)
-              }
+                </CarouselItem>
+              )}
             </>
-
           ))}
-        </CarouselContent >
+        </CarouselContent>
         <CarouselPrevious className="left-2" />
         <CarouselNext className="right-2" />
       </Carousel>

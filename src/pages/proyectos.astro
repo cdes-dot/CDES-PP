@@ -1,4 +1,5 @@
 ---
+export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import ProyectosSection from "@/components/Proyectos";
 import { Resumen } from "@/components/resumen";
@@ -8,21 +9,19 @@ import { getData } from "lib/fetch";
 const { Titulo, Subtitulo, proyectos } = await getData(
     "coleccion-de-proyecto?populate[proyectos][populate]=*",
 );
-console.log(proyectos);
 function contarInstitucionesTotales(proyectos: any): number {
-  return proyectos.reduce((total: any, proyecto: any) => {
-    const count = Array.isArray(proyecto.instituciones)
-      ? proyecto.instituciones.length
-      : 0;
-    return total + count;
-  }, 0);
+    return proyectos.reduce((total: any, proyecto: any) => {
+        const count = Array.isArray(proyecto.instituciones)
+            ? proyecto.instituciones.length
+            : 0;
+        return total + count;
+    }, 0);
 }
 
 function filtrarProyectosNoCompletados(proyectos: any[]): any[] {
-  return proyectos.filter((proyecto: any) => proyecto.Completado != true);
+    return proyectos.filter((proyecto: any) => proyecto.Completado != true);
 }
 const proyectosNoCompletados = filtrarProyectosNoCompletados(proyectos);
-console.log("Completados:",proyectosNoCompletados)
 ---
 
 <Layout>
@@ -43,7 +42,9 @@ console.log("Completados:",proyectosNoCompletados)
         <ProyectosSection proyectos={proyectosNoCompletados} client:load>
             <Resumen
                 length={proyectosNoCompletados.length}
-                instituciones={contarInstitucionesTotales(proyectosNoCompletados)}
+                instituciones={contarInstitucionesTotales(
+                    proyectosNoCompletados,
+                )}
             />
         </ProyectosSection>
     </main>

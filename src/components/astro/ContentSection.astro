@@ -1,7 +1,7 @@
 ---
 import { Button } from "@/components/ui/button";
 
-const { title, content, media } = Astro.props;
+const { title, content, media, boton } = Astro.props;
 ---
 
 <section class="py-16 md:py-32">
@@ -32,6 +32,10 @@ const { title, content, media } = Astro.props;
                         ));
                     })
                 }
+
+                <Button>
+                    <a href={`/planes/${boton.Url}`}>{boton.Contenido}</a>
+                </Button>
             </div>
         </div>
     </div>

@@ -13,6 +13,7 @@ export async function getStaticPaths() {
     }));
 }
 
+console.log(noticia.Content)
 function formatearFecha(fecha: string, hora: string) {
     const fechaObj = new Date(`${fecha}T${hora}`);
     return fechaObj.toLocaleDateString("es-DO", {
@@ -93,11 +94,55 @@ function formatearFecha(fecha: string, hora: string) {
                 <div id="article-content" class="font-inter">
                     {
                         noticia.Content.map((paragraph: any) => {
+                          if(paragraph.type === 'paragraph') {
+                          console.log(paragraph)
                             return paragraph.children.map((item: any) => (
                                 <p class="text-muted-foreground mb-4">
                                     {item.text}
                                 </p>
                             ));
+                          }
+                          if(paragraph.type === 'image') {
+                            return <img class="text-muted-foreground mb-4 rounded-md" src={paragraph.image.url}/>
+                          }
+                          if(paragraph.type === 'heading' && paragraph.level == 1) {
+                            return <h1 class="text-3xl font-bold mb-4">{paragraph.children[0].text}</h1>
+                          }
+                          if(paragraph.type === 'heading' && paragraph.level == 2) {
+                            return <h2 class="text-2xl font-bold mb-4">{paragraph.children[0].text}</h2>
+                          }
+                          if(paragraph.type === 'heading' && paragraph.level == 3) {
+                            return <h3 class="text-xl font-bold mb-4">{paragraph.children[0].text}</h3>
+                          }
+                          if(paragraph.type === 'heading' && paragraph.level == 4) {
+                            return <h4 class="text-lg font-bold mb-4">{paragraph.children[0].text}</h4>
+                          }
+                          if(paragraph.type === 'heading' && paragraph.level == 5) {
+                            return <h5 class="text-md font-bold mb-4">{paragraph.children[0].text}</h5>
+                          }
+                          if(paragraph.type === 'heading' && paragraph.level == 6) {
+                            return <h6 class="text-sm font-bold mb-4">{paragraph.children[0].text}</h6>
+                          }
+
+                          if(paragraph.type === 'quote') {
+                            return paragraph.children.map((item: any) => (
+                              <blockquote class="p-4 my-4 border-s-4 border-gray-300 bg-gray-50">
+                                  <p class="text-sm italic font-medium leading-relaxed text-gray-900 ">{item.text}</p>
+                              </blockquote>
+                              ));
+                          }
+
+                          if(paragraph.type === 'list' ) {
+                             return (<ul class="max-w-md space-y-1 text-gray-500 list-disc list-inside my-4">
+                                 {
+                                    paragraph.children.map((item: any) => {
+                                      return item.children.map((child: any) => (
+                                        <li>{child.text}</li>
+                                      ))
+                                    })
+                                 }
+                             </ul>)
+                          }
                         })
                     }
                 </div>
