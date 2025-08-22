@@ -26,7 +26,7 @@ const TodosProyectos = ({}: {}) => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const index = client.index("proyectos");
+        const index = client.index("proyecto");
         const res = await index.search("", { limit: 20 }); // "" para traer todos
         setResultados(res.hits as Proyecto[]);
       } catch (err) {
