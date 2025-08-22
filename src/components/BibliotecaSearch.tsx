@@ -80,10 +80,15 @@ export default function BibliotecaSearch() {
   }, [fetchFacetas]);
 
   // Buscar documentos
+  // Buscar documentos
   useEffect(() => {
     const search = async () => {
       setIsSearching(true);
       const filterConditions: string[] = [];
+
+      // Siempre forzar is_public
+      filterConditions.push(`public = true`);
+
       if (filtros.categoria)
         filterConditions.push(`categoria = "${filtros.categoria}"`);
       if (filtros.puesto_trabajo)
@@ -105,19 +110,7 @@ export default function BibliotecaSearch() {
         const docs = searchResults.hits as Documento[];
         setDocumentosFiltrados(docs);
 
-        // Obtener URLs de Firebase para cada documento
-        const urls: Record<string, { coverUrl: string; pdfUrl: string }> = {};
-        await Promise.all(
-          docs.map(async (doc) => {
-            console.log(doc.cover_image_path);
-            const coverUrl = doc.cover_image_path
-              ? await fetchFileUrl(doc.cover_image_path)
-              : "/placeholder.jpg";
-            const pdfUrl = await fetchFileUrl(doc.storage_path);
-            urls[doc.id] = { coverUrl, pdfUrl };
-          }),
-        );
-        setDocumentosUrls(urls);
+        // ...
       } catch (error) {
         console.error("Error during search:", error);
         setDocumentosFiltrados([]);
@@ -128,7 +121,7 @@ export default function BibliotecaSearch() {
 
     const timer = setTimeout(() => {
       search();
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [searchTerm, filtros]);
