@@ -108,6 +108,16 @@ export default function BibliotecaSearch() {
           filter: filterConditions,
         });
         const docs = searchResults.hits as Documento[];
+        await Promise.all(
+          docs.map(async (doc: any) => {
+            console.log(doc.cover_image_path);
+            const coverUrl = doc.cover_image_path
+              ? await fetchFileUrl(doc.cover_image_path)
+              : "/placeholder.jpg";
+            const pdfUrl = await fetchFileUrl(doc.storage_path);
+            docs[doc.id] = { coverUrl, pdfUrl };
+          }),
+        );
         setDocumentosFiltrados(docs);
 
         // ...
