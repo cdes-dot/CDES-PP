@@ -102,25 +102,26 @@ export default function BibliotecaSearch() {
         const date = new Date(filtros.fechaHasta);
         filterConditions.push(`date <= ${Math.floor(date.getTime() / 1000)}`);
       }
-
       try {
         const searchResults = await index.search(searchTerm, {
           filter: filterConditions,
         });
         const docs = searchResults.hits as Documento[];
+
+        const urls: Record<string, { coverUrl: string; pdfUrl: string }> = {};
+
         await Promise.all(
-          docs.map(async (doc: any) => {
-            console.log(doc.cover_image_path);
+          docs.map(async (doc) => {
             const coverUrl = doc.cover_image_path
               ? await fetchFileUrl(doc.cover_image_path)
               : "/placeholder.jpg";
             const pdfUrl = await fetchFileUrl(doc.storage_path);
-            docs[doc.id] = { coverUrl, pdfUrl };
+            urls[doc.id] = { coverUrl, pdfUrl };
           }),
         );
-        setDocumentosFiltrados(docs);
 
-        // ...
+        setDocumentosFiltrados(docs);
+        setDocumentosUrls(urls);
       } catch (error) {
         console.error("Error during search:", error);
         setDocumentosFiltrados([]);
