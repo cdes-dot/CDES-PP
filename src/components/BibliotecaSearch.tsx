@@ -38,7 +38,7 @@ interface Documento {
   storage_path: string;
 }
 
-const index = client.index("documents");
+const index = client.index("library");
 
 export default function BibliotecaSearch() {
   const [searchTerm, setSearchTerm] = useState("");
