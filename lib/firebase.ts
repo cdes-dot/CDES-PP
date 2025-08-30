@@ -1,25 +1,27 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { getFirestore } from "firebase/firestore";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAnlMW-lOQg3YmssadJp86apbtnokeu_8s",
-  authDomain: "indexador-demo-gemini.firebaseapp.com",
-  projectId: "indexador-demo-gemini",
-  storageBucket: "indexador-demo-gemini.firebasestorage.app",
-  messagingSenderId: "1054037908225",
-  appId: "1:1054037908225:web:90671d882c52c8f319d900",
+  apiKey: "AIzaSyBePVSQHLgJ9ttVf9y7-kh_RJNIsdM38lY",
+  authDomain: "cdes-admin.firebaseapp.com",
+  projectId: "cdes-admin",
+  storageBucket: "cdes-admin.firebasestorage.app",
+  messagingSenderId: "934328837900",
+  appId: "1:934328837900:web:9a8eb8bae4086eaa0fcb29",
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase (singleton)
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const storage = getStorage(app);
+const firestore = getFirestore(app);
 
-export { storage, ref, getDownloadURL };
+export { storage, firestore, ref, getDownloadURL };
 
 export async function fetchFileUrl(path: string) {
   if (!path || path.trim() === "") return "/placeholder.jpg";

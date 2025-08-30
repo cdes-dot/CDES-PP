@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { fetchFileUrl } from "../../lib/firebase";
+import { fetchFileUrl, firestore } from "../../lib/firebase";
 import {
   Select,
   SelectContent,
@@ -23,6 +23,7 @@ import {
   Loader,
 } from "lucide-react";
 import client from "@/lib/meilisearch";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 // Tipos para documentos
 interface Documento {
@@ -36,15 +37,34 @@ interface Documento {
   puesto_trabajo: string;
   cover_image_path?: string;
   storage_path: string;
+  
+  // Campos adicionales de Firestore
+  apartado?: string;
+  created_at?: string;
+  updated_at?: string;
+  estrategia?: string;
+  file_hash?: string;
+  file_id?: string;
+  file_size_bytes?: number;
+  hash?: string;
+  keywords?: string[];
+  media_type?: string;
+  original_filename?: string;
+  processing_time_estimate?: string;
+  processing_timestamp?: string;
+  public?: boolean;
+  upload_timestamp?: string;
+  uploader_email?: string;
+  uploader_id?: string;
+  user_role?: string;
+  version?: number;
 }
 
 const index = client.index("library");
 
 export default function BibliotecaSearch() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [documentosFiltrados, setDocumentosFiltrados] = useState<Documento[]>(
-    [],
-  );
+  const [documentosFiltrados, setDocumentosFiltrados] = useState<Documento[]>([]);
   const [documentosUrls, setDocumentosUrls] = useState<
     Record<string, { coverUrl: string; pdfUrl: string }>
   >({});
@@ -60,70 +80,192 @@ export default function BibliotecaSearch() {
     categoria: [] as string[],
     puesto_trabajo: [] as string[],
   });
+  const [useMeilisearch, setUseMeilisearch] = useState(true);
 
-  // Fetch facetas
-  const fetchFacetas = useCallback(async () => {
-    const results = await index.search("", {
-      facets: ["categoria", "puesto_trabajo"],
-      limit: 0,
-    });
-    setFacetas({
-      categoria: Object.keys(results.facetDistribution?.categoria || {}),
-      puesto_trabajo: Object.keys(
-        results.facetDistribution?.puesto_trabajo || {},
-      ),
-    });
+  // Check Meilisearch availability
+  useEffect(() => {
+    const checkMeilisearch = async () => {
+      try {
+        await index.search("", { limit: 1 });
+        setUseMeilisearch(true);
+      } catch {
+        setUseMeilisearch(false);
+      }
+    };
+    checkMeilisearch();
   }, []);
+
+  // Fetch facetas with fallback
+  const fetchFacetas = useCallback(async () => {
+    if (useMeilisearch) {
+      try {
+        const results = await index.search("", {
+          facets: ["categoria", "puesto_trabajo"],
+          limit: 0,
+        });
+        setFacetas({
+          categoria: Object.keys(results.facetDistribution?.categoria || {}),
+          puesto_trabajo: Object.keys(results.facetDistribution?.puesto_trabajo || {}),
+        });
+      } catch {
+        // Fallback to Firestore
+        setUseMeilisearch(false);
+      }
+    }
+    
+    if (!useMeilisearch) {
+      try {
+        const libraryRef = collection(firestore, "library");
+        const snapshot = await getDocs(query(libraryRef, where("public", "==", true)));
+        
+        const categorias = new Set<string>();
+        const puestosTrabajo = new Set<string>();
+        
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.categoria) categorias.add(data.categoria);
+          if (data.puesto_trabajo) puestosTrabajo.add(data.puesto_trabajo);
+        });
+        
+        setFacetas({
+          categoria: Array.from(categorias),
+          puesto_trabajo: Array.from(puestosTrabajo),
+        });
+      } catch {
+        setFacetas({
+          categoria: [],
+          puesto_trabajo: [],
+        });
+      }
+    }
+  }, [useMeilisearch]);
 
   useEffect(() => {
     fetchFacetas();
   }, [fetchFacetas]);
 
-  // Buscar documentos
-  // Buscar documentos
+  // Search documents with Meilisearch
+  const searchWithMeilisearch = async () => {
+    const filterConditions: string[] = [];
+    filterConditions.push(`public = true`);
+
+    if (filtros.categoria)
+      filterConditions.push(`categoria = "${filtros.categoria}"`);
+    if (filtros.puesto_trabajo)
+      filterConditions.push(`puesto_trabajo = "${filtros.puesto_trabajo}"`);
+
+    if (filtros.fechaDesde) {
+      const date = new Date(filtros.fechaDesde);
+      filterConditions.push(`date >= ${Math.floor(date.getTime() / 1000)}`);
+    }
+    if (filtros.fechaHasta) {
+      const date = new Date(filtros.fechaHasta);
+      filterConditions.push(`date <= ${Math.floor(date.getTime() / 1000)}`);
+    }
+
+    const searchResults = await index.search(searchTerm, {
+      filter: filterConditions,
+    });
+    return searchResults.hits as Documento[];
+  };
+
+  // Search documents with Firestore
+  const searchWithFirestore = async () => {
+    const libraryRef = collection(firestore, "library");
+    let firestoreQuery = query(libraryRef, where("public", "==", true));
+
+    if (filtros.categoria) {
+      firestoreQuery = query(firestoreQuery, where("categoria", "==", filtros.categoria));
+    }
+    if (filtros.puesto_trabajo) {
+      firestoreQuery = query(firestoreQuery, where("puesto_trabajo", "==", filtros.puesto_trabajo));
+    }
+    if (filtros.fechaDesde) {
+      const fechaDesde = new Date(filtros.fechaDesde).toISOString().split('T')[0];
+      firestoreQuery = query(firestoreQuery, where("date", ">=", fechaDesde));
+    }
+    if (filtros.fechaHasta) {
+      const fechaHasta = new Date(filtros.fechaHasta).toISOString().split('T')[0];
+      firestoreQuery = query(firestoreQuery, where("date", "<=", fechaHasta));
+    }
+    
+    const snapshot = await getDocs(firestoreQuery);
+    
+    let docs = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        title: data.title || "",
+        summary: data.summary || "",
+        filename: data.filename || data.original_filename || "",
+        file_extension: data.file_extension || "",
+        date: data.date || data.created_at || "",
+        categoria: data.categoria || "",
+        puesto_trabajo: data.puesto_trabajo || "",
+        cover_image_path: data.cover_image_path || "",
+        storage_path: data.storage_path || "",
+        ...data
+      } as Documento;
+    });
+
+    if (searchTerm) {
+      const lowercaseSearchTerm = searchTerm.toLowerCase();
+      docs = docs.filter(doc => {
+        const titleMatch = doc.title?.toLowerCase().includes(lowercaseSearchTerm) || false;
+        const summaryMatch = doc.summary?.toLowerCase().includes(lowercaseSearchTerm) || false;
+        const keywordsMatch = doc.keywords?.some(keyword => 
+          keyword.toLowerCase().includes(lowercaseSearchTerm)
+        ) || false;
+        return titleMatch || summaryMatch || keywordsMatch;
+      });
+    }
+    
+    return docs;
+  };
+
+  // Main search effect
   useEffect(() => {
     const search = async () => {
       setIsSearching(true);
-      const filterConditions: string[] = [];
-
-      // Siempre forzar is_public
-      filterConditions.push(`public = true`);
-
-      if (filtros.categoria)
-        filterConditions.push(`categoria = "${filtros.categoria}"`);
-      if (filtros.puesto_trabajo)
-        filterConditions.push(`puesto_trabajo = "${filtros.puesto_trabajo}"`);
-
-      if (filtros.fechaDesde) {
-        const date = new Date(filtros.fechaDesde);
-        filterConditions.push(`date >= ${Math.floor(date.getTime() / 1000)}`);
-      }
-      if (filtros.fechaHasta) {
-        const date = new Date(filtros.fechaHasta);
-        filterConditions.push(`date <= ${Math.floor(date.getTime() / 1000)}`);
-      }
+      
       try {
-        const searchResults = await index.search(searchTerm, {
-          filter: filterConditions,
-        });
-        const docs = searchResults.hits as Documento[];
+        let docs: Documento[] = [];
+        
+        if (useMeilisearch) {
+          try {
+            docs = await searchWithMeilisearch();
+          } catch {
+            setUseMeilisearch(false);
+            docs = await searchWithFirestore();
+          }
+        } else {
+          docs = await searchWithFirestore();
+        }
 
         const urls: Record<string, { coverUrl: string; pdfUrl: string }> = {};
 
         await Promise.all(
           docs.map(async (doc) => {
-            const coverUrl = doc.cover_image_path
-              ? await fetchFileUrl(doc.cover_image_path)
-              : "/placeholder.jpg";
-            const pdfUrl = await fetchFileUrl(doc.storage_path);
-            urls[doc.id] = { coverUrl, pdfUrl };
-          }),
+            try {
+              const coverUrl = doc.cover_image_path
+                ? await fetchFileUrl(doc.cover_image_path, !useMeilisearch)
+                : "/placeholder.jpg";
+              
+              if (useMeilisearch) {
+                const pdfUrl = await fetchFileUrl(doc.storage_path, !useMeilisearch);
+                urls[doc.id] = { coverUrl, pdfUrl };
+              } else {
+                urls[doc.id] = { coverUrl, pdfUrl: "#" };
+              }
+            } catch {
+              urls[doc.id] = { coverUrl: "/placeholder.jpg", pdfUrl: "#" };
+            }
+          })
         );
 
         setDocumentosFiltrados(docs);
         setDocumentosUrls(urls);
-      } catch (error) {
-        console.error("Error during search:", error);
+      } catch {
         setDocumentosFiltrados([]);
       } finally {
         setIsSearching(false);
@@ -135,7 +277,7 @@ export default function BibliotecaSearch() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, filtros]);
+  }, [searchTerm, filtros, useMeilisearch]);
 
   const handleFilterChange = (filterName: string, value: string) => {
     setFiltros((prev) => ({ ...prev, [filterName]: value }));
@@ -154,6 +296,21 @@ export default function BibliotecaSearch() {
       fechaHasta: "",
     });
     setSearchTerm("");
+  };
+
+  const handleDownload = async (doc: Documento) => {
+    if (!useMeilisearch) {
+      if (!doc.storage_path) {
+        alert("Este documento no tiene un archivo adjunto.");
+        return;
+      }
+      try {
+        const url = await fetchFileUrl(doc.storage_path, true);
+        window.open(url, '_blank');
+      } catch {
+        alert("No se pudo obtener el enlace de descarga.");
+      }
+    }
   };
 
   const categorias = facetas.categoria;
@@ -286,39 +443,73 @@ export default function BibliotecaSearch() {
                   src={documentosUrls[doc.id]?.coverUrl || "/placeholder.jpg"}
                   alt={`Portada de ${doc.title}`}
                   className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                  }}
                 />
               </CardHeader>
               <CardContent className="p-6 flex flex-col flex-grow">
                 <h2 className="text-xl font-bold mb-2 text-gray-800 flex-grow">
-                  {doc.title}
+                  {doc.title || "Sin título"}
                 </h2>
                 <p className="text-gray-700 text-sm mb-4 flex-grow">
-                  {doc.summary}
+                  {doc.summary || "Sin descripción"}
                 </p>
                 <div className="space-y-2 text-sm text-gray-600 mb-4">
-                  <p className="flex items-center">
-                    <Calendar className="mr-2 h-4 w-4" />{" "}
-                    {new Date(doc.date).toLocaleDateString()}
-                  </p>
-                  <p className="flex items-center">
-                    <Hash className="mr-2 h-4 w-4" />{" "}
-                    <Badge variant="secondary">{doc.categoria}</Badge>
-                  </p>
-                  <p className="flex items-center">
-                    <Building className="mr-2 h-4 w-4" /> {doc.puesto_trabajo}
-                  </p>
+                  {doc.date && (
+                    <p className="flex items-center">
+                      <Calendar className="mr-2 h-4 w-4" />{" "}
+                      {(() => {
+                        try {
+                          return new Date(doc.date).toLocaleDateString();
+                        } catch {
+                          return doc.date;
+                        }
+                      })()}
+                    </p>
+                  )}
+                  {doc.categoria && (
+                    <div className="flex items-center">
+                      <Hash className="mr-2 h-4 w-4" />{" "}
+                      <Badge variant="secondary">{doc.categoria}</Badge>
+                    </div>
+                  )}
+                  {doc.puesto_trabajo && (
+                    <p className="flex items-center">
+                      <Building className="mr-2 h-4 w-4" /> {doc.puesto_trabajo}
+                    </p>
+                  )}
+                  {doc.keywords && doc.keywords.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {doc.keywords.map((keyword, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {keyword}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="mt-auto flex gap-2">
-                  <Button asChild className="w-full">
-                    <a
-                      href={documentosUrls[doc.id]?.pdfUrl || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  {useMeilisearch ? (
+                    <Button asChild className="w-full">
+                      <a
+                        href={documentosUrls[doc.id]?.pdfUrl || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Descargar PDF
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full"
+                      onClick={() => handleDownload(doc)}
                     >
                       <Download className="mr-2 h-4 w-4" />
                       Descargar PDF
-                    </a>
-                  </Button>
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
