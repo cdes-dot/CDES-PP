@@ -8,7 +8,7 @@ const { Titulo, Historia, Evento, Infografia, Directivos, Asociados } =
     await getData(
         "acerca-de?populate[Evento][populate]=Media&populate[Infografia][populate]=*&populate[Directivos][populate]=*&populate[Asociados][populate]=*",
     );
-const miembros = await getData("miembros?populate=*");
+const miembros = await getData("miembros?populate=*&pagination[pageSize]=1000");
 function filter(objetos: any[]) {
     return miembros.filter((m: any) => objetos.some((o) => o.id === m.id));
 }
