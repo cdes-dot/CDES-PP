@@ -19,9 +19,11 @@ const plan = await getData(
 );
 export async function getStaticPaths() {
     const planes = await getData("Planes-estrategicos?populate=*");
-    return planes.map((plan: any) => ({
-        params: { slug: plan.Url },
-    }));
+    return planes
+        .filter((plan: any) => plan.Url && !plan.Url.includes('.'))
+        .map((plan: any) => ({
+            params: { slug: plan.Url },
+        }));
 }
 ---
 
