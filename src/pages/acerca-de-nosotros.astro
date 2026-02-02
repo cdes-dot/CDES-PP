@@ -62,7 +62,7 @@ const { Titulo, Historia, Evento, Infografia, EquipoTecnico } =
                         class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
                     >
                         {
-                            EquipoTecnico.map((miembro: any) => (
+                            (EquipoTecnico || []).map((miembro: any) => (
                                 <div class="bg-white dark:bg-muted text-gray-500 dark:text-neutral-50 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                                     <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
                                         {miembro.Portada && (
