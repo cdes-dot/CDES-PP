@@ -8,6 +8,7 @@ const { Titulo, Historia, Evento, Infografia, EquipoTecnico } =
     await getData(
         "acerca-de?populate[Evento][populate]=Media&populate[Infografia][populate]=*&populate[EquipoTecnico][populate]=*",
     );
+console.log("EquipoTecnico:", JSON.stringify(EquipoTecnico, null, 2));
 ---
 
 <Layout>
