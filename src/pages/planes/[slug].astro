@@ -13,15 +13,13 @@ import {
 } from "@/components/ui/card";
 import type { AnyZodObject } from "astro:schema";
 
-export async function getStaticPaths() {
-    const planes = await getData("Planes-estrategicos?populate[Media][populate]=*&populate[eje_estrategicos][populate]=*&populate[Objetivos][populate]=*");
-    return planes.map((plan: any) => ({
-        params: { slug: plan.Url },
-        props: { plan },
-    }));
-}
+export const prerender = false; // Disable prerendering for this page (SSR)
 
-const { plan }: { plan: any } = Astro.props;
+const { slug } = Astro.params;
+const planes = await getData(
+    `Planes-estrategicos?filters[Url][$eq]=${slug}&populate=*`
+);
+const plan = planes[0];
 ---
 
 <Layout>
