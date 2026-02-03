@@ -4,10 +4,26 @@ export const prerender = false; // Disable prerendering for this page
 import { Timeline } from "../components/Timeline";
 import { getData } from "lib/fetch";
 import { motion, AnimatePresence } from "motion/react";
-const { Titulo, Historia, Evento, Infografia, EquipoTecnico } =
-    await getData(
-        "acerca-de?populate[0]=Evento.Media&populate[1]=Infografia&populate[2]=EquipoTecnico.Portada&populate[3]=EquipoTecnico.Puesto",
+
+let Titulo = "";
+let Historia: any[] = [];
+let Evento: any[] = [];
+let Infografia: any = null;
+let EquipoTecnico: any[] = [];
+
+try {
+    const data = await getData(
+        "acerca-de?populate=*",
     );
+    Titulo = data.Titulo;
+    Historia = data.Historia || [];
+    Evento = data.Evento || [];
+    Infografia = data.Infografia;
+    EquipoTecnico = data.EquipoTecnico || [];
+    console.log("EquipoTecnico recibido:", JSON.stringify(EquipoTecnico, null, 2));
+} catch (error) {
+    console.error("Error cargando datos de acerca-de:", error);
+}
 ---
 
 <Layout>
