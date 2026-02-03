@@ -9,19 +9,6 @@ import { getData } from "lib/fetch";
 const { Titulo, Subtitulo, proyectos } = await getData(
     "coleccion-de-proyecto?populate[proyectos][populate]=*",
 );
-function contarInstitucionesTotales(proyectos: any): number {
-    return proyectos.reduce((total: any, proyecto: any) => {
-        const count = Array.isArray(proyecto.instituciones)
-            ? proyecto.instituciones.length
-            : 0;
-        return total + count;
-    }, 0);
-}
-
-function filtrarProyectosNoCompletados(proyectos: any[]): any[] {
-    return proyectos.filter((proyecto: any) => proyecto.Completado != true);
-}
-const proyectosNoCompletados = filtrarProyectosNoCompletados(proyectos);
 ---
 
 <Layout>
@@ -39,13 +26,8 @@ const proyectosNoCompletados = filtrarProyectosNoCompletados(proyectos);
         </section>
 
         <!-- Sección de proyectos -->
-        <ProyectosSection proyectos={proyectosNoCompletados} client:load>
-            <Resumen
-                length={proyectosNoCompletados.length}
-                instituciones={contarInstitucionesTotales(
-                    proyectosNoCompletados,
-                )}
-            />
+        <ProyectosSection proyectos={proyectos} client:load>
+            <Resumen length={proyectos.length} />
         </ProyectosSection>
     </main>
 </Layout>

@@ -21,34 +21,26 @@ import {
 } from "lucide-react";
 import { Resumen } from "./resumen";
 
-// Datos de proyectos actuales del CDES (simplificados según la imagen)
+// Tipo de proyecto según el nuevo esquema
 type Proyecto = {
-  instituciones?: { [key: string]: any }[]; // puede estar ausente o null
+  id: number;
+  documentId: string;
+  Titulo: string;
+  Portada: any;
+  Descripcion: any[];
+  Objetivos?: any[];
+  eje_estrategico?: {
+    id: number;
+    Nombre: string;
+  };
 };
-
-function contarInstitucionesTotales(proyectos: Proyecto[]): number {
-  return proyectos.reduce((total, proyecto) => {
-    const count = Array.isArray(proyecto.instituciones)
-      ? proyecto.instituciones.length
-      : 0;
-    return total + count;
-  }, 0);
-}
 export default function ProyectosSection({
   proyectos,
   children,
 }: {
-  proyectos: any[];
+  proyectos: Proyecto[];
   children?: React.ReactNode;
 }) {
-  // console.log(proyectos)
-  proyectos.map((proyecto) => {
-    proyecto.Objetivos.map((item: any) => {
-      item.children.map((child: any) => {
-        console.log(child.text);
-      });
-    });
-  });
   return (
     <section className="bg-muted py-16 md:py-32">
       <div className="container mx-auto max-w-7xl px-6">
@@ -77,9 +69,7 @@ export default function ProyectosSection({
 
         {/* Grid de Proyectos - Estructura según imagen */}
         <div className="grid gap-8 lg:grid-cols-2">
-          {proyectos.map((proyecto) => {
-            const IconComponent = proyecto.icono;
-            return (
+          {proyectos.map((proyecto) => (
               <Card
                 key={proyecto.id}
                 className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
@@ -94,58 +84,36 @@ export default function ProyectosSection({
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-6 min-h-[249px]">
-                  {/* Objetivos */}
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-primary">
-                      Objetivos
-                    </h4>
-
-                    {proyecto.Objetivos.map((item: any) => {
-                      return item.children.map((child: any) => {
-                        return (
-                          <p className="text-muted-foreground text-sm font-inter leading-relaxed">
-                            {child.text}
-                          </p>
-                        );
-                      });
-                    })}
-                    {/*proyecto.objetivos.map((obj: any, index: number) => (
-                      <p className="text-muted-foreground text-sm font-inter leading-relaxed">
-                        {obj}
-                      </p>
-                    ))*/}
-                  </div>
-
-                  {/* Alcance */}
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-primary">
-                      Alcance
-                    </h4>
-                    <p className="text-muted-foreground text-sm font-inter">
-                      {proyecto.Alcance}
-                    </p>
-                  </div>
-
-                  {/* Instituciones Involucradas */}
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-primary">
-                      Instituciones Involucradas
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {proyecto.instituciones.map(
-                        (institucion: any, index: number) => (
-                          <Badge
-                            key={index}
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {institucion.Nombre}
-                          </Badge>
-                        ),
-                      )}
+                <CardContent className="space-y-6 min-h-[200px]">
+                  {/* Eje Estratégico */}
+                  {proyecto.eje_estrategico && (
+                    <div className="space-y-2">
+                      <Badge variant="outline" className="text-xs">
+                        {proyecto.eje_estrategico.Nombre}
+                      </Badge>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Objetivos */}
+                  {proyecto.Objetivos && proyecto.Objetivos.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-sm text-primary">
+                        Objetivos
+                      </h4>
+                      {proyecto.Objetivos.map((item: any, idx: number) => (
+                        <div key={idx}>
+                          {item.children?.map((child: any, childIdx: number) => (
+                            <p
+                              key={childIdx}
+                              className="text-muted-foreground text-sm font-inter leading-relaxed"
+                            >
+                              {child.text}
+                            </p>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
                 <CardFooter>
                   {/* Botón Ver Detalles */}
@@ -165,8 +133,7 @@ export default function ProyectosSection({
                   </div>
                 </CardFooter>
               </Card>
-            );
-          })}
+            ))}
         </div>
 
         {/* Footer Section */}
