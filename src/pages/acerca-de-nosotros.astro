@@ -6,7 +6,7 @@ import { getData } from "lib/fetch";
 import { motion, AnimatePresence } from "motion/react";
 const { Titulo, Historia, Evento, Infografia, EquipoTecnico } =
     await getData(
-        "acerca-de?populate[Evento][populate]=Media&populate[Infografia][populate]=*&populate[EquipoTecnico][populate][Portada]=*&populate[EquipoTecnico][populate][Puesto]=*",
+        "acerca-de?populate[0]=Evento.Media&populate[1]=Infografia&populate[2]=EquipoTecnico.Portada&populate[3]=EquipoTecnico.Puesto",
     );
 ---
 
