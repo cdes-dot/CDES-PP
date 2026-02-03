@@ -16,8 +16,9 @@ type RichText = {
   children: RichTextChild[];
 };
 
-type Institucion = {
+type EjeEstrategico = {
   id: number;
+  documentId: string;
   Nombre: string;
 };
 
@@ -25,17 +26,15 @@ type Proyecto = {
   id: number;
   documentId: string;
   Titulo: string;
-  Objetivos: (string | RichText)[];
-  Alcance: string;
-  instituciones: Institucion[];
-  Descripcion?: string | null;
-  Portada?: { url: string } | null;
+  Portada: { url: string };
+  Descripcion: RichText[];
+  Objetivos?: RichText[];
+  eje_estrategico: EjeEstrategico;
 };
 
-const extractText = (objetivo: string | RichText): string => {
-  if (typeof objetivo === "string") return objetivo;
-  if (objetivo.type === "paragraph" && objetivo.children) {
-    return objetivo.children.map((child) => child.text).join(" ");
+const extractText = (block: RichText): string => {
+  if (block.type === "paragraph" && block.children) {
+    return block.children.map((child) => child.text).join(" ");
   }
   return "";
 };
@@ -104,69 +103,54 @@ const TodosProyectos = () => {
               key={proyecto.id}
               className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
             >
+              {/* Portada */}
+              <div className="aspect-video overflow-hidden">
+                <img
+                  src={proyecto.Portada.url}
+                  alt={proyecto.Titulo}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
               <CardHeader className="pb-4">
                 <h3 className="text-xl font-semibold mb-2 font-noto">
                   {proyecto.Titulo}
                 </h3>
+                {/* Eje Estratégico */}
+                {proyecto.eje_estrategico && (
+                  <Badge variant="secondary" className="w-fit">
+                    {proyecto.eje_estrategico.Nombre}
+                  </Badge>
+                )}
               </CardHeader>
 
-              <CardContent className="space-y-6 min-h-[249px]">
-                {/* Objetivos */}
+              <CardContent className="space-y-6 min-h-[200px]">
+                {/* Descripción */}
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-sm text-primary">Objetivos</h4>
-                  {proyecto.Objetivos.map((obj, idx) => (
+                  <h4 className="font-semibold text-sm text-primary">Descripción</h4>
+                  {proyecto.Descripcion.slice(0, 2).map((block, idx) => (
                     <p
                       key={idx}
-                      className="text-muted-foreground text-sm font-inter leading-relaxed"
+                      className="text-muted-foreground text-sm font-inter leading-relaxed line-clamp-3"
                     >
-                      {extractText(obj)}
+                      {extractText(block)}
                     </p>
                   ))}
                 </div>
 
-                {/* Alcance */}
-                {proyecto.Alcance && (
+                {/* Objetivos */}
+                {proyecto.Objetivos && proyecto.Objetivos.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-primary">Alcance</h4>
-                    <p className="text-muted-foreground text-sm font-inter">
-                      {proyecto.Alcance.trim()}
-                    </p>
+                    <h4 className="font-semibold text-sm text-primary">Objetivos</h4>
+                    {proyecto.Objetivos.slice(0, 2).map((obj, idx) => (
+                      <p
+                        key={idx}
+                        className="text-muted-foreground text-sm font-inter leading-relaxed"
+                      >
+                        {extractText(obj)}
+                      </p>
+                    ))}
                   </div>
-                )}
-
-                {/* Instituciones */}
-                {proyecto.instituciones.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-primary">
-                      Instituciones Involucradas
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {proyecto.instituciones.map((inst) => (
-                        <Badge key={inst.id} variant="secondary" className="text-xs">
-                          {inst.Nombre}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Descripción opcional */}
-                {proyecto.Descripcion && (
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-primary">Descripción</h4>
-                    <p className="text-muted-foreground text-sm font-inter">
-                      {proyecto.Descripcion}
-                    </p>
-                  </div>
-                )}
-
-                {/* Portada opcional */}
-                {proyecto.Portada?.url && (
-                  <img
-                    src={proyecto.Portada.url}
-                    alt={proyecto.Titulo}
-                    className="w-full h-auto rounded"
-                  />
                 )}
               </CardContent>
 
