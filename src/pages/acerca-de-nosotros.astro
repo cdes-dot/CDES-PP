@@ -2,16 +2,17 @@
 import Layout from "@/layouts/Layout.astro";
 export const prerender = false; // Disable prerendering for this page
 import { Timeline } from "../components/Timeline";
-import { getData } from "lib/fetch";
+import { getData, getEquipoTecnico, type EquipoTecnicoItem } from "lib/fetch";
 import { motion, AnimatePresence } from "motion/react";
 
 let Titulo = "";
 let Historia: any[] = [];
 let Evento: any[] = [];
 let Infografia: any = null;
-let EquipoTecnico: any[] = [];
+let EquipoTecnico: EquipoTecnicoItem[] = [];
 
 try {
+    // Obtener datos de la página "acerca de"
     const data = await getData(
         "acerca-de?populate=*",
     );
@@ -19,7 +20,9 @@ try {
     Historia = data.Historia || [];
     Evento = data.Evento || [];
     Infografia = data.Infografia;
-    EquipoTecnico = data.EquipoTecnico || [];
+    
+    // Obtener equipo técnico con sus relaciones completas
+    EquipoTecnico = await getEquipoTecnico();
     console.log("EquipoTecnico recibido:", JSON.stringify(EquipoTecnico, null, 2));
 } catch (error) {
     console.error("Error cargando datos de acerca-de:", error);
