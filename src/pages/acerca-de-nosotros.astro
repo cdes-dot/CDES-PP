@@ -6,7 +6,7 @@ import { getData } from "lib/fetch";
 import { motion, AnimatePresence } from "motion/react";
 const { Titulo, Historia, Evento, Infografia, EquipoTecnico } =
     await getData(
-        "acerca-de?populate[Evento][populate]=Media&populate[Infografia][populate]=*&populate[EquipoTecnico][populate][Portada][populate]=*&populate[EquipoTecnico][populate][Puestos][populate]=*",
+        "acerca-de?populate[Evento][populate]=Media&populate[Infografia][populate]=*&populate[EquipoTecnico][populate][Portada]=*&populate[EquipoTecnico][populate][Puesto]=*",
     );
 ---
 
@@ -79,7 +79,7 @@ const { Titulo, Historia, Evento, Infografia, EquipoTecnico } =
                                             {`${miembro.Nombres} ${miembro.Apellidos}`}
                                         </h3>
                                         <p class="text-sm font-bold mb-1">
-                                            {miembro.Puestos?.map((p: any) => p.Nombre).join(", ") || ""}
+                                            {miembro.Puesto?.Nombre || ""}
                                         </p>
                                         <p class="text-sm">
                                             {miembro.contacto || ""}
