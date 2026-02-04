@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 export const prerender = false; // Disable prerendering for this page
 import { Timeline } from "../components/Timeline";
-import { getData, getEquipoTecnico, type EquipoTecnicoItem } from "lib/fetch";
+import { getData, getEquipoTecnico, getMiembros, type EquipoTecnicoItem, type MiembroItem } from "lib/fetch";
 import { motion, AnimatePresence } from "motion/react";
 
 let Titulo = "";
@@ -10,6 +10,7 @@ let Historia: any[] = [];
 let Evento: any[] = [];
 let Infografia: any = null;
 let EquipoTecnico: EquipoTecnicoItem[] = [];
+let Miembros: MiembroItem[] = [];
 
 try {
     // Obtener datos de la página "acerca de"
@@ -24,6 +25,10 @@ try {
     // Obtener equipo técnico con sus relaciones completas
     EquipoTecnico = await getEquipoTecnico();
     console.log("EquipoTecnico recibido:", JSON.stringify(EquipoTecnico, null, 2));
+    
+    // Obtener miembros con sus relaciones completas
+    Miembros = await getMiembros();
+    console.log("Miembros recibido:", JSON.stringify(Miembros, null, 2));
 } catch (error) {
     console.error("Error cargando datos de acerca-de:", error);
 }
@@ -73,6 +78,46 @@ try {
         <section class="py-16 md:py-24 bg-background">
             <div class="mx-auto max-w-7xl px-6">
                 <Timeline timeline={Evento} client:load />
+
+                <h2 class="text-3xl font-semibold text-center mb-8">Miembros</h2>
+
+                <div class="flex flex-col space-y-4 mb-16">
+                    <div
+                        class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
+                    >
+                        {
+                            (Miembros || []).map((miembro: MiembroItem) => (
+                                <div class="bg-white dark:bg-muted text-gray-500 dark:text-neutral-50 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                                    <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
+                                        {miembro.Portada && (
+                                            <img
+                                                src={miembro.Portada.url}
+                                                alt={`Foto de ${miembro.Nombres}`}
+                                                class="h-110 w-full object-cover object-center"
+                                                onerror="this.src='/miembros/default-avatar.jpg'"
+                                            />
+                                        )}
+                                    </div>
+                                    <div class="p-6">
+                                        <h3 class="text-lg font-semibold mb-2">
+                                            {`${miembro.Nombres} ${miembro.Apellidos}`}
+                                        </h3>
+                                        {miembro.Puestos && miembro.Puestos.length > 0 && (
+                                            <p class="text-sm font-bold mb-1">
+                                                {miembro.Puestos.map(p => p.Nombre).join(", ")}
+                                            </p>
+                                        )}
+                                        {miembro.institucion && (
+                                            <p class="text-sm">
+                                                {miembro.institucion.Nombre}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </div>
 
                 <h2 class="text-3xl font-semibold text-center mb-8">Equipo Técnico</h2>
 

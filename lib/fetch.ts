@@ -79,3 +79,59 @@ export const getEquipoTecnico = async (): Promise<EquipoTecnicoItem[]> => {
     return [];
   }
 };
+
+// Interfaz para el modelo de Miembro
+export interface MiembroItem {
+  id: number;
+  documentId: string;
+  Nombres: string;
+  Apellidos: string;
+  Portada?: {
+    id: number;
+    url: string;
+    formats?: {
+      thumbnail?: { url: string };
+      small?: { url: string };
+      medium?: { url: string };
+      large?: { url: string };
+    };
+  };
+  institucion?: {
+    id: number;
+    Nombre: string;
+  };
+  Puestos?: {
+    id: number;
+    Nombre: string;
+  }[];
+}
+
+/**
+ * Obtiene los miembros con todas sus relaciones (Portada, institucion y Puestos)
+ * @returns Array de miembros
+ */
+export const getMiembros = async (): Promise<MiembroItem[]> => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.PUBLIC_STRAPI_URL}/api/miembros?populate[Portada]=*&populate[institucion]=*&populate[Puestos]=*`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const json = await response.json();
+    console.log("Miembros raw response:", JSON.stringify(json, null, 2));
+    
+    return json.data || [];
+  } catch (error) {
+    console.error("Error fetching miembros:", error);
+    return [];
+  }
+};
