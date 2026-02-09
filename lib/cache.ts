@@ -157,7 +157,7 @@ export const fetchWithCache = async (
   cacheType?: 'navigation' | 'global' | 'articles' | 'projects' | 'videos' | 'contact' | 'team' | 'members'
 ) => {
   const cacheKey = `fetch:${url}:${JSON.stringify(options)}`;
-  
+
   return getCachedData(
     cacheKey,
     async () => {
@@ -171,9 +171,10 @@ export const fetchWithCache = async (
   );
 };
 
-// Limpieza automática cada 10 minutos
-if (typeof globalThis !== 'undefined') {
-  setInterval(() => {
+// Remove global setInterval for cleanup (not allowed in Cloudflare Workers)
+// Instead, provide a manual cleanup function
+export const cleanupCache = () => {
+  if (typeof globalThis !== 'undefined') {
     globalCache.cleanup();
-  }, 10 * 60 * 1000);
-}
+  }
+};
