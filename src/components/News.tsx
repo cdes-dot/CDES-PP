@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useMemo, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function NewsSection({
@@ -16,19 +16,23 @@ export default function NewsSection({
   const [selectedNews, setSelectedNews] = useState(news[0]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // console.log(news)
+  // FIXED: Estabilizar la referencia del array news
+  const stableNews = useMemo(() => news, [news.length]);
+
   // Auto-rotate news every 8 seconds
   useEffect(() => {
+    if (!stableNews || stableNews.length === 0) return;
+    
     const interval = setInterval(() => {
       setSelectedIndex((prevIndex) => {
-        const nextIndex = prevIndex >= news.length - 1 ? 0 : prevIndex + 1;
-        setSelectedNews(news[nextIndex]);
+        const nextIndex = prevIndex >= stableNews.length - 1 ? 0 : prevIndex + 1;
+        setSelectedNews(stableNews[nextIndex]);
         return nextIndex;
       });
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [news]);
+  }, [stableNews.length]); // FIXED: Solo depender del length, no del array completo
 
   const handleNewsClick = (item: any, index: number) => {
     setSelectedNews(item);

@@ -39,18 +39,19 @@ const extractText = (block: RichText): string => {
   return "";
 };
 
+// FIXED: Mover el index fuera del componente para evitar recreación en cada render
+const searchIndex = client.index("proyecto");
+
 const TodosProyectos = () => {
   const [query, setQuery] = useState("");
   const [resultados, setResultados] = useState<Proyecto[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const index = client.index("proyecto");
-
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const res = await index.search("", { limit: 20 });
+        const res = await searchIndex.search("", { limit: 20 });
         setResultados(res.hits as Proyecto[]);
       } catch (err) {
         console.error(err);
@@ -59,13 +60,13 @@ const TodosProyectos = () => {
       setLoading(false);
     };
     fetchAll();
-  }, [index]);
+  }, []); // FIXED: Sin dependencias - solo ejecuta una vez
 
   const buscar = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await index.search(query, { limit: 20 });
+      const res = await searchIndex.search(query, { limit: 20 });
       setResultados(res.hits as Proyecto[]);
     } catch (err) {
       console.error(err);

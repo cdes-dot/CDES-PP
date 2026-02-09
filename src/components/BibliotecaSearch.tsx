@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -69,12 +69,18 @@ export default function BibliotecaSearch() {
     Record<string, { coverUrl: string; pdfUrl: string }>
   >({});
   const [isSearching, setIsSearching] = useState(true);
-  const [filtros, setFiltros] = useState({
+  
+  // FIXED: Usar useState para objeto inmutable y useMemo para estabilizar
+  const [filtrosBase, setFiltrosBase] = useState({
     categoria: "",
     puesto_trabajo: "",
     fechaDesde: "",
     fechaHasta: "",
   });
+  
+  // Memorizar el objeto filtros para evitar recreación
+  const filtros = useMemo(() => filtrosBase, [filtrosBase]);
+  
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [facetas, setFacetas] = useState({
     categoria: [] as string[],
@@ -277,10 +283,10 @@ export default function BibliotecaSearch() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, filtros, useMeilisearch]);
+  }, [searchTerm, filtros.categoria, filtros.puesto_trabajo, filtros.fechaDesde, filtros.fechaHasta, useMeilisearch]); // FIXED: usar propiedades específicas en lugar del objeto completo
 
   const handleFilterChange = (filterName: string, value: string) => {
-    setFiltros((prev) => ({ ...prev, [filterName]: value }));
+    setFiltrosBase((prev) => ({ ...prev, [filterName]: value })); // FIXED: usar setFiltrosBase
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -289,7 +295,7 @@ export default function BibliotecaSearch() {
   };
 
   const resetFilters = () => {
-    setFiltros({
+    setFiltrosBase({
       categoria: "",
       puesto_trabajo: "",
       fechaDesde: "",

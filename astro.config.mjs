@@ -1,8 +1,8 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
-import vercel from "@astrojs/vercel";
 import react from "@astrojs/react";
+import cloudflare from "@astrojs/cloudflare";
 
 export default defineConfig({
   vite: {
@@ -18,8 +18,8 @@ export default defineConfig({
       }
     }
   },
-  output: "static",
-  adapter: vercel({}),
+  output: "server",
+  adapter: cloudflare(),
   integrations: [react({
     include: ['**/components/**/*.tsx', '**/components/**/*.ts'] // Asegurar que React reconozca tus componentes
   })],

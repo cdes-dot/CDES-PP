@@ -2,29 +2,47 @@
 import "../styles/globals.css";
 import { Menu } from "../components/Menu";
 import FooterSection from "@/components/astro/FooterSection.astro";
+import { fetchWithCache } from "../../lib/cache";
 
-const menu = await (
-    await fetch(
-        `${import.meta.env.PUBLIC_STRAPI_URL}/api/navegacion?populate=*`,
-        {
-            headers: {
-                Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
-            },
-        },
-    )
-).json();
+// Optimización: Peticiones en paralelo con cache
+let menuData = null;
+let globalData = null;
 
-const global = await fetch(
-    `${import.meta.env.PUBLIC_STRAPI_URL}/api/global?populate=*`,
-    {
+try {
+  // Hacer ambas peticiones en paralelo usando el sistema de cache
+  const [menuResponse, globalResponse] = await Promise.all([
+    fetchWithCache(
+      `${import.meta.env.PUBLIC_STRAPI_URL}/api/navegacion?populate=*`,
+      {
         headers: {
-            Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+          Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
         },
-    },
-);
+      },
+      'navigation'
+    ),
+    fetchWithCache(
+      `${import.meta.env.PUBLIC_STRAPI_URL}/api/global?populate=*`,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+        },
+      },
+      'global'
+    )
+  ]);
 
-const { Titulo, Descripcion, Icono } = (await global.json()).data;
-const { Paginas, Logo } = menu.data;
+  menuData = menuResponse;
+  globalData = globalResponse;
+  
+} catch (error) {
+  console.error("Error fetching layout data:", error);
+  // Valores por defecto en caso de error
+  menuData = { data: { Paginas: [], Logo: null } };
+  globalData = { data: { Titulo: "", Descripcion: "", Icono: { url: "" } } };
+}
+
+const { Titulo, Descripcion, Icono } = globalData?.data || {};
+const { Paginas, Logo } = menuData?.data || {};
 // console.log(`${import.meta.env.PUBLIC_STRAPI_URL}${Icono.url}`);
 ---
 
@@ -135,24 +153,32 @@ const { Paginas, Logo } = menu.data;
                 const themeIcon = document.getElementById("theme-icon");
 
                 function updateThemeIcon() {
-                    const isDark =
-                        document.documentElement.classList.contains("dark");
-                    themeIcon.textContent = isDark ? "☀️" : "🌙";
+                    if (themeIcon) {
+                        const isDark =
+                            document.documentElement.classList.contains("dark");
+                        themeIcon.textContent = isDark ? "☀️" : "🌙";
+                    }
                 }
 
-                themeToggle?.addEventListener("click", () => {
-                    const isDark =
-                        document.documentElement.classList.contains("dark");
-                    document.documentElement.classList.toggle("dark", !isDark);
+                if (themeToggle && themeIcon) {
+                    themeToggle.addEventListener("click", () => {
+                        const isDark =
+                            document.documentElement.classList.contains("dark");
+                        document.documentElement.classList.toggle("dark", !isDark);
 
-                    // The existing MutationObserver will automatically save to localStorage
+                        // The existing MutationObserver will automatically save to localStorage
+                        updateThemeIcon();
+                    });
+
+                    // Initial icon update
                     updateThemeIcon();
-                });
-
-                // Initial icon update
-                updateThemeIcon();
+                }
             });
         </script>
         <FooterSection />
+        
+        <!-- Monitor de cache solo en desarrollo -->
+        {import.meta.env.DEV && <div id="cache-monitor-root"></div>}
+        
     </body>
 </html>

@@ -10,9 +10,9 @@
     "search": "node ./scripts/index-meilisearch.js"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/node": "^9.4.2",
     "@astrojs/react": "^4.3.0",
-    "@astrojs/vercel": "^8.2.0",
     "@justinribeiro/lite-youtube": "^1.8.2",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",

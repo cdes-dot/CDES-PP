@@ -6,31 +6,30 @@ import { Label } from "@/components/ui/label";
 export const prerender = false;
 import { Button } from "@/components/ui/button";
 import Layout from "@/layouts/Layout.astro";
+import { fetchWithCache } from "../../lib/cache";
 
-const contactRequest = await fetch(
+// Optimización: Una sola petición con populate completo usando cache
+let contactData = null;
+
+try {
+  contactData = await fetchWithCache(
     `${import.meta.env.PUBLIC_STRAPI_URL}/api/contacto?populate[Contacto][populate]=*`,
     {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
-        },
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+      },
     },
-);
-const request = await fetch(
-    `${import.meta.env.PUBLIC_STRAPI_URL}/api/contacto?populate=*`,
-    {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
-        },
-    },
-);
-const response = await request.json();
-const { Titulo, Subtitulo, Contactos } = response.data;
-const contactResponse = await contactRequest.json();
-const { data } = contactResponse;
+    'contact'
+  );
+} catch (error) {
+  console.error("Error fetching contact data:", error);
+  contactData = { data: { Titulo: "", Subtitulo: "", Contactos: [], Contacto: [] } };
+}
+
+const { Titulo, Subtitulo, Contactos } = contactData.data;
+const { data } = contactData; // Usando la misma respuesta para ambos casos
 ---
 
 <Layout>

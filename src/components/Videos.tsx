@@ -9,36 +9,51 @@ import {
 import { Pause, Play } from "lucide-react";
 import { useEffect, useState } from "react";
 import YouTube from "react-youtube";
+import { fetchWithCache } from "../../lib/cache";
 
 export default function CarouselVideos() {
   const [playingVideo, setPlayingVideo] = useState<number | null>(null);
   const [data, setVideos] = useState({
     Videos: [],
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
+    // Solo cargar si no se ha cargado antes
+    if (hasLoaded) return;
+    
     const fetchVideos = async () => {
-      const request = await fetch(
-        `${import.meta.env.PUBLIC_STRAPI_URL}/api/pagina-principal?populate[Contenidos][populate]=*`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+      setIsLoading(true);
+      try {
+        // Usar fetchWithCache para optimizar las peticiones
+        const response = await fetchWithCache(
+          `${import.meta.env.PUBLIC_STRAPI_URL}/api/pagina-principal?populate[Contenidos][populate]=*`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+            },
           },
-        },
-      );
-      const data = await request.json();
-      return data;
-    };
-    fetchVideos().then((response) => {
-      if (response) {
-        setVideos({ Videos: response.data.Contenidos });
-      } else {
-        console.error("No data found");
-        throw new Error("No data found");
+          'videos'
+        );
+        
+        if (response?.data?.Contenidos) {
+          setVideos({ Videos: response.data.Contenidos });
+          setHasLoaded(true);
+          console.log("Videos loaded from cache or API");
+        } else {
+          console.error("No video data found");
+        }
+      } catch (error) {
+        console.error("Error fetching videos:", error);
+      } finally {
+        setIsLoading(false);
       }
-    });
-  }, []);
+    };
+    
+    fetchVideos();
+  }, []); // Solo se ejecuta una vez
 
   const handleVideoPlay = (videoId: number) => {
     setPlayingVideo(videoId);

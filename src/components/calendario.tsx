@@ -13,7 +13,7 @@ import {
   createViewWeek,
 } from "@schedule-x/calendar";
 import { createEventsServicePlugin } from "@schedule-x/events-service";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import "@schedule-x/theme-default/dist/index.css";
 type TipoEvento =
   | "cultural"
@@ -140,7 +140,7 @@ const CalendarApp = ({ eventos }: { eventos: any[] }) => {
     callbacks: {
       onEventClick(calendarEvent) {
         const eventoId = calendarEvent.id;
-        const eventoCompleto = eventosNormalizados.find(
+        const eventoCompleto = eventosNormalizadosStable.find(
           (e) => e.id === eventoId,
         );
         setEventoSeleccionado(eventoCompleto || null);
@@ -148,22 +148,25 @@ const CalendarApp = ({ eventos }: { eventos: any[] }) => {
     },
   });
 
-  // Filtrar eventos cuando cambia el filtro
+  // FIXED: Estabilizar eventosNormalizados con useMemo
+  const eventosNormalizadosStable = useMemo(() => eventosNormalizados, [eventosNormalizados.length]);
+
+  // Filtrar eventos cuando cambia el filtro - FIXED
   useEffect(() => {
     const eventosParaMostrar =
       filtrosActivos.length > 0
-        ? eventosNormalizados.filter((e) => filtrosActivos.includes(e.type))
-        : eventosNormalizados;
+        ? eventosNormalizadosStable.filter((e) => filtrosActivos.includes(e.type))
+        : eventosNormalizadosStable;
 
     eventsService.set(eventosParaMostrar);
-  }, [filtrosActivos, eventsService, eventosNormalizados]);
+  }, [filtrosActivos, eventsService, eventosNormalizadosStable.length]); // FIXED: usar length en lugar del array completo
 
   const eventosFiltrados =
     filtrosActivos.length > 0
-      ? eventosNormalizados.filter((evento) =>
+      ? eventosNormalizadosStable.filter((evento) =>
           filtrosActivos.includes(evento.type),
         )
-      : eventosNormalizados;
+      : eventosNormalizadosStable;
 
   const handleTagClick = (type: string) => {
     setFiltrosActivos((prevFiltros) =>
@@ -303,12 +306,12 @@ const CalendarApp = ({ eventos }: { eventos: any[] }) => {
         <p>📅 Haz clic en un evento existente para ver todos los detalles</p>
         <p>
           🗓️ El calendario muestra {eventosFiltrados.length} de{" "}
-          {eventosNormalizados.length} eventos programados
+          {eventosNormalizadosStable.length} eventos programados
         </p>
         <div className="mt-2 text-xs">
           <strong>Distribución:</strong>
           {tiposUnicos.map((tipo: TipoEvento) => {
-            const count = eventosNormalizados.filter(
+            const count = eventosNormalizadosStable.filter(
               (e) => e.type === tipo,
             ).length;
             const tipoData = tiposEvento[tipo] || tiposEvento.otro;
