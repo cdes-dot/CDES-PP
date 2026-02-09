@@ -17,16 +17,25 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase (singleton)
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const storage = getStorage(app);
-const firestore = getFirestore(app);
+function getFirebaseApp() {
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  return app;
+}
 
-export { storage, firestore, ref, getDownloadURL };
+function getFirebaseServices() {
+  const app = getFirebaseApp();
+  const storage = getStorage(app);
+  const firestore = getFirestore(app);
+  return { storage, firestore };
+}
+
+export { getFirebaseApp, getFirebaseServices, ref, getDownloadURL };
 
 export async function fetchFileUrl(path: string) {
   if (!path || path.trim() === "") return "/placeholder.jpg";
 
   try {
+    const { storage } = getFirebaseServices();
     const fileRef = ref(storage, path); // path debe ser algo como "CDES_inst/.../archivo.pdf"
     const url = await getDownloadURL(fileRef);
     return url;
