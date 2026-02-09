@@ -4,46 +4,53 @@ import { Menu } from "../components/Menu";
 import FooterSection from "@/components/astro/FooterSection.astro";
 import { fetchWithCache } from "../../lib/cache";
 
-// Optimización: Peticiones en paralelo con cache
-let menuData = null;
-let globalData = null;
+// Move async operations to a handler function
+export async function getStaticProps() {
+  let menuData = null;
+  let globalData = null;
 
-try {
-  // Hacer ambas peticiones en paralelo usando el sistema de cache
-  const [menuResponse, globalResponse] = await Promise.all([
-    fetchWithCache(
-      `${import.meta.env.PUBLIC_STRAPI_URL}/api/navegacion?populate=*`,
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+  try {
+    // Perform both requests in parallel using the cache system
+    const [menuResponse, globalResponse] = await Promise.all([
+      fetchWithCache(
+        `${import.meta.env.PUBLIC_STRAPI_URL}/api/navegacion?populate=*`,
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+          },
         },
-      },
-      'navigation'
-    ),
-    fetchWithCache(
-      `${import.meta.env.PUBLIC_STRAPI_URL}/api/global?populate=*`,
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+        'navigation'
+      ),
+      fetchWithCache(
+        `${import.meta.env.PUBLIC_STRAPI_URL}/api/global?populate=*`,
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.PUBLIC_STRAPI_KEY}`,
+          },
         },
-      },
-      'global'
-    )
-  ]);
+        'global'
+      )
+    ]);
 
-  menuData = menuResponse;
-  globalData = globalResponse;
-  
-} catch (error) {
-  console.error("Error fetching layout data:", error);
-  // Valores por defecto en caso de error
-  menuData = { data: { Paginas: [], Logo: null } };
-  globalData = { data: { Titulo: "", Descripcion: "", Icono: { url: "" } } };
+    menuData = menuResponse;
+    globalData = globalResponse;
+  } catch (error) {
+    console.error("Error fetching layout data:", error);
+    // Default values in case of error
+    menuData = { data: { Paginas: [], Logo: null } };
+    globalData = { data: { Titulo: "", Descripcion: "", Icono: { url: "" } } };
+  }
+
+  return {
+    props: {
+      menuData,
+      globalData,
+    },
+  };
 }
 
-const { Titulo, Descripcion, Icono } = globalData?.data || {};
-const { Paginas, Logo } = menuData?.data || {};
-// console.log(`${import.meta.env.PUBLIC_STRAPI_URL}${Icono.url}`);
+const { Titulo, Descripcion, Icono } = Astro.props.globalData?.data || {};
+const { Paginas, Logo } = Astro.props.menuData?.data || {};
 ---
 
 <html lang="es">
