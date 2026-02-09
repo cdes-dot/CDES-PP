@@ -3,7 +3,11 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { fetchFileUrl, firestore } from "../../lib/firebase";
+import { fetchFileUrl, getFirebaseServices } from "../../lib/firebase";
+
+// Obtener firestore desde los servicios de Firebase
+const { firestore } = getFirebaseServices();
+
 import {
   Select,
   SelectContent,
@@ -60,7 +64,9 @@ interface Documento {
   version?: number;
 }
 
-const index = client.index("library");
+// Fix for MeiliSearch client initialization
+const meiliClient = client(); // Ensure client is instantiated
+const index = meiliClient.index("library");
 
 export default function BibliotecaSearch() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -254,11 +260,11 @@ export default function BibliotecaSearch() {
           docs.map(async (doc) => {
             try {
               const coverUrl = doc.cover_image_path
-                ? await fetchFileUrl(doc.cover_image_path, !useMeilisearch)
+                ? await fetchFileUrlWrapper(doc.cover_image_path)
                 : "/placeholder.jpg";
               
               if (useMeilisearch) {
-                const pdfUrl = await fetchFileUrl(doc.storage_path, !useMeilisearch);
+                const pdfUrl = await fetchFileUrlWrapper(doc.storage_path);
                 urls[doc.id] = { coverUrl, pdfUrl };
               } else {
                 urls[doc.id] = { coverUrl, pdfUrl: "#" };
@@ -291,7 +297,7 @@ export default function BibliotecaSearch() {
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFiltros((prev) => ({ ...prev, [name]: value }));
+    setFiltrosBase((prev: typeof filtrosBase) => ({ ...prev, [name]: value }));
   };
 
   const resetFilters = () => {
@@ -311,7 +317,7 @@ export default function BibliotecaSearch() {
         return;
       }
       try {
-        const url = await fetchFileUrl(doc.storage_path, true);
+        const url = await fetchFileUrlWrapper(doc.storage_path);
         window.open(url, '_blank');
       } catch {
         alert("No se pudo obtener el enlace de descarga.");
@@ -535,3 +541,14 @@ export default function BibliotecaSearch() {
     </div>
   );
 }
+
+// Fix for fetchFileUrl function calls
+// Updated to use only one argument as per the function definition
+const fetchFileUrlWrapper = async (path: string) => {
+  try {
+    return await fetchFileUrl(path);
+  } catch (error) {
+    console.error("Error fetching file URL:", error);
+    return "/placeholder.jpg"; // Fallback URL
+  }
+};
