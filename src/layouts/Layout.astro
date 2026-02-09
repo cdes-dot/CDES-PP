@@ -49,8 +49,14 @@ export async function getStaticProps() {
   };
 }
 
+// Replace globalData and menuData with Astro.props
 const { Titulo, Descripcion, Icono } = Astro.props.globalData?.data || {};
 const { Paginas, Logo } = Astro.props.menuData?.data || {};
+
+// Add default values to prevent undefined errors
+const iconUrl = Icono?.url || "/default-icon.png";
+const logoUrl = Logo?.url || "/default-logo.png";
+
 ---
 
 <html lang="es">
@@ -70,14 +76,14 @@ const { Paginas, Logo } = Astro.props.menuData?.data || {};
         <link
             rel="icon"
             type="image/svg+xml"
-            href={`${import.meta.env.PUBLIC_STRAPI_URL}${Icono.url}`}
+            href={`${import.meta.env.PUBLIC_STRAPI_URL}${iconUrl}`}
         />
 
-        <title>{Titulo}</title>
+        <title>{Titulo || "Título por defecto"}</title>
     </head>
     <body>
         <div class="flex justify-between items-center md:p-4">
-            <Menu menuItems={Paginas} logo={Logo.url} client:only />
+            <Menu menuItems={Paginas || []} logo={logoUrl} client:only />
 
             <!-- Theme Toggle Button -->
             <!-- <button
