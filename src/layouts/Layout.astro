@@ -43,7 +43,14 @@ const { Titulo, Descripcion, Icono } = globalData?.data || {};
 const { Paginas, Logo } = menuData?.data || {};
 
 // Add default values to prevent undefined errors
-const iconUrl = Icono?.url || "/default-icon.png";
+// Helper function to build full URL - checks if URL is already absolute
+const buildFullUrl = (url: string) => {
+  if (!url) return "/default-icon.png";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${import.meta.env.PUBLIC_STRAPI_URL}${url}`;
+};
+
+const iconUrl = buildFullUrl(Icono?.url || "/default-icon.png");
 const logoUrl = Logo?.url || "/default-logo.png";
 
 ---
@@ -65,7 +72,7 @@ const logoUrl = Logo?.url || "/default-logo.png";
         <link
             rel="icon"
             type="image/svg+xml"
-            href={`${import.meta.env.PUBLIC_STRAPI_URL}${iconUrl}`}
+            href={iconUrl}
         />
 
         <title>{Titulo || "Título por defecto"}</title>
