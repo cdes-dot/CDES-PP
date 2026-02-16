@@ -17,10 +17,10 @@ try {
     const data = await getData(
         "acerca-de?populate=*",
     );
-    Titulo = data.Titulo;
-    Historia = data.Historia || [];
-    Evento = data.Evento || [];
-    Infografia = data.Infografia;
+    Titulo = data?.Titulo || "";
+    Historia = data?.Historia || [];
+    Evento = data?.Evento || [];
+    Infografia = data?.Infografia || null;
     
     // Obtener equipo técnico con sus relaciones completas
     EquipoTecnico = await getEquipoTecnico();
@@ -47,29 +47,31 @@ try {
                         <h1 class="mb-6 text-4xl font-semibold md:text-5xl">
                             {Titulo}
                         </h1>
-                        <img
-                            src={Infografia.url}
-                            alt="Infografía"
-                            class="rounded-md object-cover mb-10 order-1 lg:hidden block"
-                        />
-                        {
-                            Historia.map((paragraph: any) => {
-                                return paragraph.children.map((item: any) => (
-                                    <p class="line leading-6 text-left text-sm/8">
-                                        {item.text}
-                                    </p>
-                                ));
-                            })
-                        }
+                        {Infografia?.url && (
+                            <img
+                                src={Infografia.url}
+                                alt="Infografía"
+                                class="rounded-md object-cover mb-10 order-1 lg:hidden block"
+                            />
+                        )}
+                        {(Historia || []).map((paragraph: any) => {
+                            return (paragraph.children || []).map((item: any) => (
+                                <p class="line leading-6 text-left text-sm/8">
+                                    {item.text}
+                                </p>
+                            ));
+                        })}
                     </div>
                     <div
                         class="divide-y divide-dashed sm:mx-auto max-w-2xl lg:mx-0 lg:block hidden"
                     >
-                        <img
-                            src={Infografia.url}
-                            alt="Infografía"
-                            class="rounded-md object-cover mb-10 order-1"
-                        />
+                        {Infografia?.url && (
+                            <img
+                                src={Infografia.url}
+                                alt="Infografía"
+                                class="rounded-md object-cover mb-10 order-1"
+                            />
+                        )}
                     </div>
                 </div>
             </div>
