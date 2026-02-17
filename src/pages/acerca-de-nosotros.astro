@@ -4,6 +4,11 @@ export const prerender = false; // Disable prerendering for this page
 import { Timeline } from "../components/Timeline";
 import { getData, getEquipoTecnico, getMiembros, type EquipoTecnicoItem, type MiembroItem } from "lib/fetch";
 import { motion, AnimatePresence } from "motion/react";
+import { globalCache } from "lib/cache";
+
+// Invalidar caché de equipo técnico y miembros para obtener datos frescos
+globalCache.invalidate('equipoTecnico:full');
+globalCache.invalidate('miembros:full');
 
 let Titulo = "";
 let Historia: any[] = [];

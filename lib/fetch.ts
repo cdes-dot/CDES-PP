@@ -98,9 +98,32 @@ export const getEquipoTecnico = async (): Promise<EquipoTecnicoItem[]> => {
         }
 
         const json = await response.json();
-        console.log("Equipo Técnico raw response (cached):", JSON.stringify(json, null, 2));
+        console.log("Equipo Técnico raw response:", JSON.stringify(json, null, 2));
         
-        return json.data || [];
+        // Transformar la estructura de Strapi a un formato plano
+        const transformedData = (json.data || []).map((item: any) => {
+          const attrs = item.attributes || item;
+          
+          return {
+            id: item.id,
+            documentId: item.documentId,
+            Nombres: attrs.Nombres,
+            Apellidos: attrs.Apellidos,
+            contacto: attrs.contacto,
+            Portada: attrs.Portada?.data ? {
+              id: attrs.Portada.data.id,
+              url: `${import.meta.env.PUBLIC_STRAPI_URL}${attrs.Portada.data.attributes.url}`,
+              formats: attrs.Portada.data.attributes.formats
+            } : undefined,
+            Puesto: attrs.Puesto?.data ? {
+              id: attrs.Puesto.data.id,
+              Nombre: attrs.Puesto.data.attributes.Nombre
+            } : undefined
+          };
+        });
+        
+        console.log("Equipo Técnico transformed:", JSON.stringify(transformedData, null, 2));
+        return transformedData;
       } catch (error) {
         console.error("Error fetching equipo técnico:", error);
         return [];
@@ -162,9 +185,35 @@ export const getMiembros = async (): Promise<MiembroItem[]> => {
         }
 
         const json = await response.json();
-        console.log("Miembros raw response (cached):", JSON.stringify(json, null, 2));
+        console.log("Miembros raw response:", JSON.stringify(json, null, 2));
         
-        return json.data || [];
+        // Transformar la estructura de Strapi a un formato plano
+        const transformedData = (json.data || []).map((item: any) => {
+          const attrs = item.attributes || item;
+          
+          return {
+            id: item.id,
+            documentId: item.documentId,
+            Nombres: attrs.Nombres,
+            Apellidos: attrs.Apellidos,
+            Portada: attrs.Portada?.data ? {
+              id: attrs.Portada.data.id,
+              url: `${import.meta.env.PUBLIC_STRAPI_URL}${attrs.Portada.data.attributes.url}`,
+              formats: attrs.Portada.data.attributes.formats
+            } : undefined,
+            institucion: attrs.institucion?.data ? {
+              id: attrs.institucion.data.id,
+              Nombre: attrs.institucion.data.attributes.Nombre
+            } : undefined,
+            Puestos: attrs.Puestos?.data ? attrs.Puestos.data.map((puesto: any) => ({
+              id: puesto.id,
+              Nombre: puesto.attributes.Nombre
+            })) : []
+          };
+        });
+        
+        console.log("Miembros transformed:", JSON.stringify(transformedData, null, 2));
+        return transformedData;
       } catch (error) {
         console.error("Error fetching miembros:", error);
         return [];
