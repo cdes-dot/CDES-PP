@@ -86,7 +86,7 @@ try {
             <div class="mx-auto max-w-7xl px-6">
                 <Timeline timeline={Evento} client:load />
 
-                <h2 class="text-3xl font-semibold text-center mb-8">Miembros</h2>
+                <h2 class="text-3xl font-semibold text-center mb-8">Junta Directiva</h2>
 
                 <div class="flex flex-col space-y-4 mb-16">
                     <div
@@ -109,16 +109,6 @@ try {
                                         <h3 class="text-lg font-semibold mb-2">
                                             {`${miembro.Nombres} ${miembro.Apellidos}`}
                                         </h3>
-                                        {miembro.Puestos && miembro.Puestos.length > 0 && (
-                                            <p class="text-sm font-bold mb-1">
-                                                {miembro.Puestos.map(p => p.Nombre).join(", ")}
-                                            </p>
-                                        )}
-                                        {miembro.institucion && (
-                                            <p class="text-sm">
-                                                {miembro.institucion.Nombre}
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
                             ))
@@ -139,7 +129,7 @@ try {
                                         {miembro.Portada && (
                                             <img
                                                 src={miembro.Portada.url}
-                                                alt={`Foto de ${miembro.Nombres}`}
+                                                alt={`Foto de ${miembro.Nombre}`}
                                                 class="h-110 w-full object-cover object-center"
                                                 onerror="this.src='/miembros/default-avatar.jpg'"
                                             />
@@ -147,13 +137,10 @@ try {
                                     </div>
                                     <div class="p-6">
                                         <h3 class="text-lg font-semibold  mb-2">
-                                            {`${miembro.Nombres} ${miembro.Apellidos}`}
+                                            {`${miembro.Nombre} ${miembro.Apellidos}`}
                                         </h3>
-                                        <p class="text-sm font-bold mb-1">
-                                            {miembro.Puesto?.Nombre || ""}
-                                        </p>
                                         <p class="text-sm">
-                                            {miembro.contacto || ""}
+                                            {miembro.Contacto || ""}
                                         </p>
                                     </div>
                                 </div>

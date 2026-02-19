@@ -1,5 +1,19 @@
 import { getCachedData } from './cache';
 
+/**
+ * Helper function to normalize image URLs from Strapi
+ * Handles both absolute and relative URLs
+ */
+const normalizeImageUrl = (url: string | undefined): string => {
+  if (!url) return '';
+  // If URL is already absolute (starts with http:// or https://), return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // If URL is relative, prepend STRAPI_URL
+  return `${import.meta.env.PUBLIC_STRAPI_URL}${url}`;
+};
+
 export const getData = async (url: string, meta: boolean = false) => {
   // Determinar el tipo de cache basado en la URL
   let cacheType: 'navigation' | 'global' | 'articles' | 'projects' | 'videos' | 'contact' | 'team' | 'members' | undefined;
@@ -53,9 +67,9 @@ export const getData = async (url: string, meta: boolean = false) => {
 export interface EquipoTecnicoItem {
   id: number;
   documentId: string;
-  Nombres: string;
+  Nombre: string;
   Apellidos: string;
-  contacto: string;
+  Contacto: string;
   Portada?: {
     id: number;
     url: string;
@@ -65,10 +79,6 @@ export interface EquipoTecnicoItem {
       medium?: { url: string };
       large?: { url: string };
     };
-  };
-  Puesto?: {
-    id: number;
-    Nombre: string;
   };
 }
 
@@ -84,7 +94,7 @@ export const getEquipoTecnico = async (): Promise<EquipoTecnicoItem[]> => {
     async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.PUBLIC_STRAPI_URL}/api/equipo-tecnicos?populate[Portada]=*&populate[Puesto]=*`,
+          `${import.meta.env.PUBLIC_STRAPI_URL}/api/equipo-tecnicos?populate=Portada`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -107,17 +117,17 @@ export const getEquipoTecnico = async (): Promise<EquipoTecnicoItem[]> => {
           return {
             id: item.id,
             documentId: item.documentId,
-            Nombres: attrs.Nombres,
+            Nombre: attrs.Nombre,
             Apellidos: attrs.Apellidos,
-            contacto: attrs.contacto,
+            Contacto: attrs.Contacto,
             Portada: attrs.Portada?.data ? {
               id: attrs.Portada.data.id,
               url: `${import.meta.env.PUBLIC_STRAPI_URL}${attrs.Portada.data.attributes.url}`,
               formats: attrs.Portada.data.attributes.formats
             } : undefined,
-            Puesto: attrs.Puesto?.data ? {
-              id: attrs.Puesto.data.id,
-              Nombre: attrs.Puesto.data.attributes.Nombre
+            puesto: attrs.puesto?.data ? {
+              id: attrs.puesto.data.id,
+              Nombre: attrs.puesto.data.attributes.Nombre
             } : undefined
           };
         });
@@ -149,14 +159,6 @@ export interface MiembroItem {
       large?: { url: string };
     };
   };
-  institucion?: {
-    id: number;
-    Nombre: string;
-  };
-  Puestos?: {
-    id: number;
-    Nombre: string;
-  }[];
 }
 
 /**
@@ -171,7 +173,7 @@ export const getMiembros = async (): Promise<MiembroItem[]> => {
     async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.PUBLIC_STRAPI_URL}/api/miembros?populate[Portada]=*&populate[institucion]=*&populate[Puestos]=*`,
+          `${import.meta.env.PUBLIC_STRAPI_URL}/api/miembros?populate=Portada`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -198,17 +200,9 @@ export const getMiembros = async (): Promise<MiembroItem[]> => {
             Apellidos: attrs.Apellidos,
             Portada: attrs.Portada?.data ? {
               id: attrs.Portada.data.id,
-              url: `${import.meta.env.PUBLIC_STRAPI_URL}${attrs.Portada.data.attributes.url}`,
-              formats: attrs.Portada.data.attributes.formats
-            } : undefined,
-            institucion: attrs.institucion?.data ? {
-              id: attrs.institucion.data.id,
-              Nombre: attrs.institucion.data.attributes.Nombre
-            } : undefined,
-            Puestos: attrs.Puestos?.data ? attrs.Puestos.data.map((puesto: any) => ({
-              id: puesto.id,
-              Nombre: puesto.attributes.Nombre
-            })) : []
+              url: normalizeImageUrl(attrs.Portada.data.attributes?.url || attrs.Portada.data.url),
+              formats: attrs.Portada.data.attributes?.formats
+            } : undefined
           };
         });
         
