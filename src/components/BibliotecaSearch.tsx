@@ -464,43 +464,6 @@ export default function BibliotecaSearch() {
                 <h2 className="text-xl font-bold mb-2 text-gray-800 flex-grow">
                   {doc.title || "Sin título"}
                 </h2>
-                <p className="text-gray-700 text-sm mb-4 flex-grow">
-                  {doc.summary || "Sin descripción"}
-                </p>
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
-                  {doc.date && (
-                    <p className="flex items-center">
-                      <Calendar className="mr-2 h-4 w-4" />{" "}
-                      {(() => {
-                        try {
-                          return new Date(doc.date).toLocaleDateString();
-                        } catch {
-                          return doc.date;
-                        }
-                      })()}
-                    </p>
-                  )}
-                  {doc.categoria && (
-                    <div className="flex items-center">
-                      <Hash className="mr-2 h-4 w-4" />{" "}
-                      <Badge variant="secondary">{doc.categoria}</Badge>
-                    </div>
-                  )}
-                  {doc.puesto_trabajo && (
-                    <p className="flex items-center">
-                      <Building className="mr-2 h-4 w-4" /> {doc.puesto_trabajo}
-                    </p>
-                  )}
-                  {doc.keywords && doc.keywords.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {doc.keywords.map((keyword, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {keyword}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
                 <div className="mt-auto flex gap-2">
                   {useMeilisearch ? (
                     <Button asChild className="w-full">
