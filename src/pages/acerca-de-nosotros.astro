@@ -15,7 +15,13 @@ try {
     console.log("🔄 Cargando datos de acerca-de...");
 
     // Obtener todos los datos desde acerca-de con populate completo
-    const data = await getData("acerca-de?populate=*");
+    const data = await getData(
+        "acerca-de?populate[Miembros][populate][Portada]=true" +
+        "&populate[Miembros][populate][institucion]=true" +
+        "&populate[equipo_tecnicos][populate][Portada]=true" +
+        "&populate[Infografia]=true" +
+        "&populate[Evento]=true"
+    );
     
     console.log("📦 Estructura de datos recibida:", {
         keys: Object.keys(data || {}),
@@ -50,23 +56,19 @@ try {
         console.log("🔍 Procesando Miembros desde acerca-de...");
         console.log("📋 Raw Miembros data:", JSON.stringify(data.Miembros, null, 2));
         if (Array.isArray(data.Miembros)) {
-            Miembros = data.Miembros.map((item: any) => {
-                console.log("👤 Procesando miembro:", item.Nombres, "- puesto raw:", item.puesto, "- Puesto raw:", item.Puesto);
-                return {
-                    id: item.id,
-                    Nombres: item.Nombres,
-                    Apellidos: item.Apellidos,
-                    Portada: item.Portada?.url ? {
-                        url: item.Portada.url.startsWith('http') 
-                            ? item.Portada.url 
-                            : `${import.meta.env.PUBLIC_STRAPI_URL}${item.Portada.url}`
-                    } : null,
-                    institucion: item.institucion ? {
-                        Nombre: item.institucion.Nombre
-                    } : null,
-                    puesto: item.puesto || item.Puesto || null
-                };
-            });
+            Miembros = data.Miembros.map((item: any) => ({
+                id: item.id,
+                Nombres: item.Nombres,
+                Apellidos: item.Apellidos,
+                Portada: item.Portada?.url ? {
+                    url: item.Portada.url  // URL ya viene completa
+                } : null,
+                institucion: item.institucion ? {
+                    Nombre: item.institucion.Nombre,
+                    Url: item.institucion.Url  // También tiene Url si la quieres usar
+                } : null,
+                puesto: item.Puesto || null  // Puesto con mayúscula
+            }));
         } else if (data.Miembros.data) {
             Miembros = data.Miembros.data.map((item: any) => {
                 console.log("👤 Procesando miembro (data):", item.attributes?.Nombres, "- puesto raw:", item.attributes?.puesto, "- Puesto raw:", item.attributes?.Puesto);
@@ -91,21 +93,16 @@ try {
         console.log("🔍 Procesando Equipo Técnico desde acerca-de...");
         console.log("📋 Raw Equipo Técnico data:", JSON.stringify(data.equipo_tecnicos, null, 2));
         if (Array.isArray(data.equipo_tecnicos)) {
-            EquipoTecnicos = data.equipo_tecnicos.map((item: any) => {
-                console.log("👨‍💻 Procesando equipo técnico:", item.Nombre, "- puesto raw:", item.puesto, "- Puesto raw:", item.Puesto);
-                return {
-                    id: item.id,
-                    Nombre: item.Nombre,
-                    Apellidos: item.Apellidos,
-                    Contacto: item.Contacto,
-                    Portada: item.Portada?.url ? {
-                        url: item.Portada.url.startsWith('http') 
-                            ? item.Portada.url 
-                            : `${import.meta.env.PUBLIC_STRAPI_URL}${item.Portada.url}`
-                    } : null,
-                    puesto: item.puesto || item.Puesto || null
-                };
-            });
+            EquipoTecnicos = data.equipo_tecnicos.map((item: any) => ({
+                id: item.id,
+                Nombre: item.Nombre,
+                Apellidos: item.Apellidos,
+                Contacto: item.Contacto,
+                Portada: item.Portada?.url ? {
+                    url: item.Portada.url  // URL ya viene completa
+                } : null,
+                puesto: item.Puesto || null  // Puesto con mayúscula
+            }));
         } else if (data.equipo_tecnicos.data) {
             EquipoTecnicos = data.equipo_tecnicos.data.map((item: any) => {
                 console.log("👨‍💻 Procesando equipo técnico (data):", item.attributes?.Nombre, "- puesto raw:", item.attributes?.puesto, "- Puesto raw:", item.attributes?.Puesto);
