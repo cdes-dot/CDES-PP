@@ -1,41 +1,140 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-export const prerender = false; // Disable prerendering for this page
+export const prerender = false;
 import { Timeline } from "../components/Timeline";
-import { getData, getEquipoTecnico, getMiembros, type EquipoTecnicoItem, type MiembroItem } from "lib/fetch";
-import { motion, AnimatePresence } from "motion/react";
-import { globalCache } from "lib/cache";
-
-// Invalidar caché de equipo técnico y miembros para obtener datos frescos
-globalCache.invalidate('equipoTecnico:full');
-globalCache.invalidate('miembros:full');
+import { getData, getMiembros, getEquipoTecnico } from "lib/fetch";
 
 let Titulo = "";
 let Historia: any[] = [];
 let Evento: any[] = [];
 let Infografia: any = null;
-let EquipoTecnico: EquipoTecnicoItem[] = [];
-let Miembros: MiembroItem[] = [];
+let Miembros: any[] = [];
+let EquipoTecnicos: any[] = [];
 
 try {
-    // Obtener datos de la página "acerca de"
-    const data = await getData(
-        "acerca-de?populate=*",
-    );
-    Titulo = data?.Titulo || "";
+    console.log("🔄 Cargando datos de acerca-de...");
+
+    // Obtener todos los datos desde acerca-de con populate completo
+    const data = await getData("acerca-de?populate=*");
+    
+    console.log("📦 Estructura de datos recibida:", {
+        keys: Object.keys(data || {}),
+        Titulo: data?.Titulo,
+        Historia: !!data?.Historia,
+        Evento: !!data?.Evento,
+        Infografia: !!data?.Infografia,
+        Miembros: !!data?.Miembros,
+        equipo_tecnicos: !!data?.equipo_tecnicos
+    });
+
+    // Datos básicos
+    Titulo = data?.Titulo || "Acerca de Nosotros";
     Historia = data?.Historia || [];
     Evento = data?.Evento || [];
-    Infografia = data?.Infografia || null;
-    
-    // Obtener equipo técnico con sus relaciones completas
-    EquipoTecnico = await getEquipoTecnico();
-    console.log("EquipoTecnico recibido:", JSON.stringify(EquipoTecnico, null, 2));
-    
-    // Obtener miembros con sus relaciones completas
-    Miembros = await getMiembros();
-    console.log("Miembros recibido:", JSON.stringify(Miembros, null, 2));
+
+    // Procesar infografía
+    if (data?.Infografia?.url) {
+        Infografia = {
+            url: data.Infografia.url.startsWith('http')
+                ? data.Infografia.url
+                : `${import.meta.env.PUBLIC_STRAPI_URL}${data.Infografia.url}`
+        };
+    } else if (data?.Infografia?.data?.attributes?.url) {
+        Infografia = {
+            url: `${import.meta.env.PUBLIC_STRAPI_URL}${data.Infografia.data.attributes.url}`
+        };
+    }
+
+    // 🆕 Procesar miembros desde acerca-de (no endpoint separado)
+    if (data?.Miembros) {
+        console.log("🔍 Procesando Miembros desde acerca-de...");
+        console.log("📋 Raw Miembros data:", JSON.stringify(data.Miembros, null, 2));
+        if (Array.isArray(data.Miembros)) {
+            Miembros = data.Miembros.map((item: any) => {
+                console.log("👤 Procesando miembro:", item.Nombres, "- puesto raw:", item.puesto, "- Puesto raw:", item.Puesto);
+                return {
+                    id: item.id,
+                    Nombres: item.Nombres,
+                    Apellidos: item.Apellidos,
+                    Portada: item.Portada?.url ? {
+                        url: item.Portada.url.startsWith('http') 
+                            ? item.Portada.url 
+                            : `${import.meta.env.PUBLIC_STRAPI_URL}${item.Portada.url}`
+                    } : null,
+                    institucion: item.institucion ? {
+                        Nombre: item.institucion.Nombre
+                    } : null,
+                    puesto: item.puesto || item.Puesto || null
+                };
+            });
+        } else if (data.Miembros.data) {
+            Miembros = data.Miembros.data.map((item: any) => {
+                console.log("👤 Procesando miembro (data):", item.attributes?.Nombres, "- puesto raw:", item.attributes?.puesto, "- Puesto raw:", item.attributes?.Puesto);
+                return {
+                    id: item.id,
+                    Nombres: item.attributes?.Nombres,
+                    Apellidos: item.attributes?.Apellidos,
+                    Portada: item.attributes?.Portada?.data ? {
+                        url: `${import.meta.env.PUBLIC_STRAPI_URL}${item.attributes.Portada.data.attributes.url}`
+                    } : null,
+                    institucion: item.attributes?.institucion?.data ? {
+                        Nombre: item.attributes.institucion.data.attributes.Nombre
+                    } : null,
+                    puesto: item.attributes?.puesto || item.attributes?.Puesto || null
+                };
+            });
+        }
+    }
+
+    // 🆕 Procesar equipo técnico desde acerca-de (no endpoint separado)
+    if (data?.equipo_tecnicos) {
+        console.log("🔍 Procesando Equipo Técnico desde acerca-de...");
+        console.log("📋 Raw Equipo Técnico data:", JSON.stringify(data.equipo_tecnicos, null, 2));
+        if (Array.isArray(data.equipo_tecnicos)) {
+            EquipoTecnicos = data.equipo_tecnicos.map((item: any) => {
+                console.log("👨‍💻 Procesando equipo técnico:", item.Nombre, "- puesto raw:", item.puesto, "- Puesto raw:", item.Puesto);
+                return {
+                    id: item.id,
+                    Nombre: item.Nombre,
+                    Apellidos: item.Apellidos,
+                    Contacto: item.Contacto,
+                    Portada: item.Portada?.url ? {
+                        url: item.Portada.url.startsWith('http') 
+                            ? item.Portada.url 
+                            : `${import.meta.env.PUBLIC_STRAPI_URL}${item.Portada.url}`
+                    } : null,
+                    puesto: item.puesto || item.Puesto || null
+                };
+            });
+        } else if (data.equipo_tecnicos.data) {
+            EquipoTecnicos = data.equipo_tecnicos.data.map((item: any) => {
+                console.log("👨‍💻 Procesando equipo técnico (data):", item.attributes?.Nombre, "- puesto raw:", item.attributes?.puesto, "- Puesto raw:", item.attributes?.Puesto);
+                return {
+                    id: item.id,
+                    Nombre: item.attributes?.Nombre,
+                    Apellidos: item.attributes?.Apellidos,
+                    Contacto: item.attributes?.Contacto,
+                    Portada: item.attributes?.Portada?.data ? {
+                        url: `${import.meta.env.PUBLIC_STRAPI_URL}${item.attributes.Portada.data.attributes.url}`
+                    } : null,
+                    puesto: item.attributes?.puesto || item.attributes?.Puesto || null
+                };
+            });
+        }
+    }
+
+    console.log("✅ Datos procesados:");
+    console.log("- Título:", Titulo);
+    console.log("- Historia:", Historia?.length || 0);
+    console.log("- Eventos:", Evento?.length || 0);
+    console.log("- Infografía:", !!Infografia);
+    console.log("- Miembros:", Miembros?.length || 0);
+    console.log("🔍 Miembros procesados:", Miembros.map(m => ({ nombre: m.Nombres, puesto: m.puesto })));
+    console.log("- Equipo Técnico:", EquipoTecnicos?.length || 0);
+    console.log("🔍 Equipo Técnico procesado:", EquipoTecnicos.map(e => ({ nombre: e.Nombre, puesto: e.puesto })));
+
 } catch (error) {
-    console.error("Error cargando datos de acerca-de:", error);
+    console.error("❌ Error cargando datos:", error);
 }
 ---
 
@@ -48,33 +147,50 @@ try {
                 <div
                     class="grid gap-y-12 px-2 lg:[grid-template-columns:2fr_auto] space-x-8 lg:grid-cols-2"
                 >
-                    <div class="text-center lg:text-left space-y-2">
+                    <div class="text-center lg:text-left space-y-4">
                         <h1 class="mb-6 text-4xl font-semibold md:text-5xl">
                             {Titulo}
                         </h1>
-                        {Infografia?.url && (
+                        
+                        {/* Infografía en móvil */}
+                        {Infografia && (
                             <img
                                 src={Infografia.url}
                                 alt="Infografía"
-                                class="rounded-md object-cover mb-10 order-1 lg:hidden block"
+                                class="rounded-md object-cover mb-6 lg:hidden block w-full"
+                                loading="lazy"
                             />
                         )}
-                        {(Historia || []).map((paragraph: any) => {
-                            return (paragraph.children || []).map((item: any) => (
-                                <p class="line leading-6 text-left text-sm/8">
-                                    {item.text}
+                        
+                        {/* Historia */}
+                        <div class="space-y-4">
+                            {Historia && Historia.length > 0 ? (
+                                Historia.map((block: any, blockIndex: number) => {
+                                    if (block?.children) {
+                                        return block.children.map((item: any, index: number) => (
+                                            <p class="text-left text-sm leading-relaxed">
+                                                {item.text}
+                                            </p>
+                                        ));
+                                    }
+                                    return null;
+                                })
+                            ) : (
+                                <p class="text-left text-sm leading-relaxed text-gray-600">
+                                    No hay información de historia disponible.
                                 </p>
-                            ));
-                        })}
+                            )}
+                        </div>
                     </div>
-                    <div
-                        class="divide-y divide-dashed sm:mx-auto max-w-2xl lg:mx-0 lg:block hidden"
-                    >
-                        {Infografia?.url && (
+                    
+                    {/* Infografía en desktop */}
+                    <div class="hidden lg:block">
+                        {Infografia && (
                             <img
                                 src={Infografia.url}
                                 alt="Infografía"
-                                class="rounded-md object-cover mb-10 order-1"
+                                class="rounded-md object-cover w-full"
+                                loading="lazy"
                             />
                         )}
                     </div>
@@ -84,70 +200,101 @@ try {
 
         <section class="py-16 md:py-24 bg-background">
             <div class="mx-auto max-w-7xl px-6">
-                <Timeline timeline={Evento} client:load />
+                {/* Timeline de Eventos */}
+                {Evento && Evento.length > 0 && (
+                    <div class="mb-16">
+                        <Timeline timeline={Evento} client:load />
+                    </div>
+                )}
 
-                <h2 class="text-3xl font-semibold text-center mb-8">Junta Directiva</h2>
+                {/* Junta Directiva */}
+                {Miembros && Miembros.length > 0 && (
+                    <div class="mb-16">
+                        <h2 class="text-3xl font-semibold text-center mb-8">Junta Directiva</h2>
 
-                <div class="flex flex-col space-y-4 mb-16">
-                    <div
-                        class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
-                    >
-                        {
-                            (Miembros || []).map((miembro: MiembroItem) => (
-                                <div class="bg-white dark:bg-muted text-gray-500 dark:text-neutral-50 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                                    <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
-                                        {miembro.Portada && (
+                        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                            {Miembros.map((miembro: any) => (
+                                <div class="bg-white dark:bg-muted rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                                    <div class="h-64 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                        {miembro.Portada ? (
                                             <img
                                                 src={miembro.Portada.url}
-                                                alt={`Foto de ${miembro.Nombres}`}
-                                                class="h-110 w-full object-cover object-center"
-                                                onerror="this.src='/miembros/default-avatar.jpg'"
+                                                alt={`${miembro.Nombres} ${miembro.Apellidos}`}
+                                                class="h-full w-full object-cover object-center"
+                                                loading="lazy"
                                             />
+                                        ) : (
+                                            <div class="h-full w-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                                                <svg class="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                                </svg>
+                                            </div>
                                         )}
                                     </div>
                                     <div class="p-6">
                                         <h3 class="text-lg font-semibold mb-2">
-                                            {`${miembro.Nombres} ${miembro.Apellidos}`}
+                                            {miembro.Nombres} {miembro.Apellidos}
                                         </h3>
+                                        {miembro.institucion && (
+                                            <p class="text-sm text-gray-600 dark:text-neutral-400 mb-2">
+                                                {miembro.institucion.Nombre}
+                                            </p>
+                                        )}
+                                        {miembro.puesto && (
+                                            <span class="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 text-xs px-2 py-1 rounded">
+                                                {miembro.puesto}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
-                            ))
-                        }
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
-                <h2 class="text-3xl font-semibold text-center mb-8">Equipo Técnico</h2>
-
-                <div class="flex flex-col space-y-4">
-                    <div
-                        class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
-                    >
-                        {
-                            (EquipoTecnico || []).map((miembro: any) => (
-                                <div class="bg-white dark:bg-muted text-gray-500 dark:text-neutral-50 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                                    <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
-                                        {miembro.Portada && (
+                {/* Equipo Técnico */}
+                {EquipoTecnicos && EquipoTecnicos.length > 0 && (
+                    <div>
+                        <h2 class="text-3xl font-semibold text-center mb-8">Equipo Técnico</h2>
+                        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                            {EquipoTecnicos.map((miembro: any) => (
+                                <div class="bg-white dark:bg-muted rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                                    <div class="h-64 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                        {miembro.Portada ? (
                                             <img
                                                 src={miembro.Portada.url}
-                                                alt={`Foto de ${miembro.Nombre}`}
-                                                class="h-110 w-full object-cover object-center"
-                                                onerror="this.src='/miembros/default-avatar.jpg'"
+                                                alt={`${miembro.Nombre} ${miembro.Apellidos}`}
+                                                class="h-full w-full object-cover object-center"
+                                                loading="lazy"
                                             />
+                                        ) : (
+                                            <div class="h-full w-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                                                <svg class="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                                </svg>
+                                            </div>
                                         )}
                                     </div>
                                     <div class="p-6">
-                                        <h3 class="text-lg font-semibold  mb-2">
-                                            {`${miembro.Nombre} ${miembro.Apellidos}`}
+                                        <h3 class="text-lg font-semibold mb-2">
+                                            {miembro.Nombre} {miembro.Apellidos}
                                         </h3>
-                                        <p class="text-sm">
-                                            {miembro.Contacto || ""}
-                                        </p>
+                                        {miembro.Contacto && (
+                                            <p class="text-sm text-gray-600 dark:text-neutral-400 mb-2">
+                                                {miembro.Contacto}
+                                            </p>
+                                        )}
+                                        {miembro.puesto && (
+                                            <span class="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 text-xs px-2 py-1 rounded">
+                                                {miembro.puesto}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
-                            ))
-                        }
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </section>
     </div>
