@@ -2,14 +2,29 @@
 import Layout from "@/layouts/Layout.astro";
 export const prerender = false;
 import { Timeline } from "../components/Timeline";
-import { getData, getMiembros, getEquipoTecnico } from "lib/fetch";
+import { getData } from "lib/fetch";
 
 let Titulo = "";
 let Historia: any[] = [];
+let Vision: any[] = [];
+let Mision: any[] = [];
+let Objetivos: any[] = [];
+let Valores: any[] = [];
 let Evento: any[] = [];
 let Infografia: any = null;
 let Miembros: any[] = [];
 let EquipoTecnicos: any[] = [];
+
+const getBlockTexts = (blocks: any[] = []) => {
+    if (!Array.isArray(blocks)) return [];
+
+    return blocks.flatMap((block: any) => {
+        if (!Array.isArray(block?.children)) return [];
+        return block.children
+            .map((item: any) => item?.text)
+            .filter((text: string) => typeof text === "string" && text.trim().length > 0);
+    });
+};
 
 try {
     console.log("🔄 Cargando datos de acerca-de...");
@@ -27,6 +42,10 @@ try {
         keys: Object.keys(data || {}),
         Titulo: data?.Titulo,
         Historia: !!data?.Historia,
+        Vision: !!data?.Vision,
+        Mision: !!data?.Mision,
+        Objetivos: !!data?.Objetivos,
+        Valores: !!data?.Valores,
         Evento: !!data?.Evento,
         Infografia: !!data?.Infografia,
         Miembros: !!data?.Miembros,
@@ -36,6 +55,10 @@ try {
     // Datos básicos
     Titulo = data?.Titulo || "Acerca de Nosotros";
     Historia = data?.Historia || [];
+    Vision = data?.Vision || [];
+    Mision = data?.Mision || [];
+    Objetivos = data?.Objetivos || [];
+    Valores = data?.Valores || [];
     Evento = data?.Evento || [];
 
     // Procesar infografía
@@ -123,6 +146,10 @@ try {
     console.log("✅ Datos procesados:");
     console.log("- Título:", Titulo);
     console.log("- Historia:", Historia?.length || 0);
+    console.log("- Visión:", Vision?.length || 0);
+    console.log("- Misión:", Mision?.length || 0);
+    console.log("- Objetivos:", Objetivos?.length || 0);
+    console.log("- Valores:", Valores?.length || 0);
     console.log("- Eventos:", Evento?.length || 0);
     console.log("- Infografía:", !!Infografia);
     console.log("- Miembros:", Miembros?.length || 0);
@@ -161,17 +188,12 @@ try {
                         
                         {/* Historia */}
                         <div class="space-y-4">
-                            {Historia && Historia.length > 0 ? (
-                                Historia.map((block: any, blockIndex: number) => {
-                                    if (block?.children) {
-                                        return block.children.map((item: any, index: number) => (
-                                            <p class="text-left text-sm leading-relaxed">
-                                                {item.text}
-                                            </p>
-                                        ));
-                                    }
-                                    return null;
-                                })
+                            {getBlockTexts(Historia).length > 0 ? (
+                                getBlockTexts(Historia).map((text: string) => (
+                                    <p class="text-left text-sm leading-relaxed">
+                                        {text}
+                                    </p>
+                                ))
                             ) : (
                                 <p class="text-left text-sm leading-relaxed text-gray-600">
                                     No hay información de historia disponible.
@@ -189,6 +211,56 @@ try {
                                 class="rounded-md object-cover w-full"
                                 loading="lazy"
                             />
+                        )}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-12 md:py-16 bg-background">
+            <div class="mx-auto max-w-7xl px-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="rounded-lg border border-neutral-200 p-6 bg-white dark:bg-muted">
+                        <h2 class="text-2xl font-semibold mb-4">Visión</h2>
+                        {getBlockTexts(Vision).length > 0 ? (
+                            getBlockTexts(Vision).map((text: string) => (
+                                <p class="text-sm leading-relaxed mb-3 last:mb-0">{text}</p>
+                            ))
+                        ) : (
+                            <p class="text-sm leading-relaxed text-gray-600">Sin contenido de visión.</p>
+                        )}
+                    </div>
+
+                    <div class="rounded-lg border border-neutral-200 p-6 bg-white dark:bg-muted">
+                        <h2 class="text-2xl font-semibold mb-4">Misión</h2>
+                        {getBlockTexts(Mision).length > 0 ? (
+                            getBlockTexts(Mision).map((text: string) => (
+                                <p class="text-sm leading-relaxed mb-3 last:mb-0">{text}</p>
+                            ))
+                        ) : (
+                            <p class="text-sm leading-relaxed text-gray-600">Sin contenido de misión.</p>
+                        )}
+                    </div>
+
+                    <div class="rounded-lg border border-neutral-200 p-6 bg-white dark:bg-muted">
+                        <h2 class="text-2xl font-semibold mb-4">Objetivos</h2>
+                        {getBlockTexts(Objetivos).length > 0 ? (
+                            getBlockTexts(Objetivos).map((text: string) => (
+                                <p class="text-sm leading-relaxed mb-3 last:mb-0">{text}</p>
+                            ))
+                        ) : (
+                            <p class="text-sm leading-relaxed text-gray-600">Sin contenido de objetivos.</p>
+                        )}
+                    </div>
+
+                    <div class="rounded-lg border border-neutral-200 p-6 bg-white dark:bg-muted">
+                        <h2 class="text-2xl font-semibold mb-4">Valores</h2>
+                        {getBlockTexts(Valores).length > 0 ? (
+                            getBlockTexts(Valores).map((text: string) => (
+                                <p class="text-sm leading-relaxed mb-3 last:mb-0">{text}</p>
+                            ))
+                        ) : (
+                            <p class="text-sm leading-relaxed text-gray-600">Sin contenido de valores.</p>
                         )}
                     </div>
                 </div>
