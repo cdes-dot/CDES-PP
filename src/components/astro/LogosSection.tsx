@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 
 export default function LogosSection() {
   const [logos, setLogos] = useState([]);
+
   useEffect(() => {
     const fetchLogos = async () => {
       const request = await fetch(
-        `${import.meta.env.PUBLIC_STRAPI_URL}/api/aliados?populate[institucion][populate]=*`,
+        `${import.meta.env.PUBLIC_STRAPI_URL}/api/aliados?populate=Logo`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -29,6 +30,7 @@ export default function LogosSection() {
       console.error("Error fetching logos:", error);
     });
   }, []);
+
   return (
     <section className="bg-background pb-16 md:pb-32">
       <div className="group relative m-auto">
@@ -40,12 +42,12 @@ export default function LogosSection() {
           </div>
           <div className="relative py-6 md:w-[calc(100%-11rem)]">
             <InfiniteSlider speedOnHover={20} speed={40} gap={112}>
-              {logos.map((logo: any, index: number) => (
+              {logos.map((logo: any) => (
                 <div className="flex" key={logo.Url}>
                   <img
                     className="mx-auto size-8 w-fit dark:invert"
-                    src={logo.institucion.Media.url}
-                    alt="Nvidia Logo"
+                    src={logo.Logo.url}
+                    alt={logo.Nombre}
                     height="40"
                     width="auto"
                   />
@@ -53,10 +55,8 @@ export default function LogosSection() {
               ))}
             </InfiniteSlider>
 
-            <div className="bg-linear-to-r from-background absolute inset-y-0 left-0 w-20">
-            </div>
-            <div className="bg-linear-to-l from-background absolute inset-y-0 right-0 w-20">
-            </div>
+            <div className="bg-linear-to-r from-background absolute inset-y-0 left-0 w-20" />
+            <div className="bg-linear-to-l from-background absolute inset-y-0 right-0 w-20" />
             <ProgressiveBlur
               className="pointer-events-none absolute left-0 top-0 h-full w-20"
               direction="left"

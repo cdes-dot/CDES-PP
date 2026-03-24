@@ -20,7 +20,7 @@ export function Menu({ menuItems, logo }: { menuItems: any[]; logo: string }) {
               >
                 <img
                   src={logo}
-                  className="h-16 w-auto object-contain md:h-30"
+                  className="h-16 w-auto object-contain md:h-20"
                   width={200}
                   height={100}
                   alt="logo"
