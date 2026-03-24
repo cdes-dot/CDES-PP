@@ -1,5 +1,5 @@
 import { Menu as MenuIcon, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function Menu({ menuItems, logo }: { menuItems: any[]; logo: string }) {
   const [menuState, setMenuState] = useState(false);
@@ -11,8 +11,8 @@ export function Menu({ menuItems, logo }: { menuItems: any[]; logo: string }) {
         className="fixed z-20 w-full border-b border-dashed bg-white backdrop-blur md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent"
       >
         <div className="m-auto px-6">
-          <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
-            <div className="flex w-full justify-between lg:w-auto">
+          <div className="flex items-center justify-between gap-6 py-3 lg:py-4">
+            <div className="flex w-full items-center justify-between lg:w-auto">
               <a
                 href="/"
                 aria-label="home"
@@ -20,9 +20,9 @@ export function Menu({ menuItems, logo }: { menuItems: any[]; logo: string }) {
               >
                 <img
                   src={logo}
-                  className="w-1/3 h-fit"
-                  width={48}
-                  height={48}
+                  className="h-16 w-auto object-contain md:h-30"
+                  width={200}
+                  height={100}
                   alt="logo"
                 />
               </a>
@@ -38,7 +38,7 @@ export function Menu({ menuItems, logo }: { menuItems: any[]; logo: string }) {
               </button>
             </div>
 
-            <div className="bg-background in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
+            <div className="bg-background in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:mb-0 lg:ml-auto lg:flex lg:w-auto lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
               <div className="lg:pr-4">
                 <ul
                   id="main-menu"
