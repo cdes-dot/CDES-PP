@@ -6,12 +6,9 @@ import { getData } from "lib/fetch";
 
 let Titulo = "";
 let Historia: any[] = [];
-let Vision: any[] = [];
-let Mision: any[] = [];
-let Objetivos: any[] = [];
-let Valores: any[] = [];
 let Evento: any[] = [];
 let Infografia: any = null;
+let MisionVisionObjetivo: any = null;
 let Miembros: any[] = [];
 let EquipoTecnicos: any[] = [];
 
@@ -35,6 +32,7 @@ try {
         "&populate[Miembros][populate][institucion]=true" +
         "&populate[equipo_tecnicos][populate][Portada]=true" +
         "&populate[Infografia]=true" +
+        "&populate[Mision_Vision_Objeitvo]=true" +
         "&populate[Evento]=true"
     );
     
@@ -42,10 +40,7 @@ try {
         keys: Object.keys(data || {}),
         Titulo: data?.Titulo,
         Historia: !!data?.Historia,
-        Vision: !!data?.Vision,
-        Mision: !!data?.Mision,
-        Objetivos: !!data?.Objetivos,
-        Valores: !!data?.Valores,
+        Mision_Vision_Objeitvo: !!data?.Mision_Vision_Objeitvo,
         Evento: !!data?.Evento,
         Infografia: !!data?.Infografia,
         Miembros: !!data?.Miembros,
@@ -55,10 +50,6 @@ try {
     // Datos básicos
     Titulo = data?.Titulo || "Acerca de Nosotros";
     Historia = data?.Historia || [];
-    Vision = data?.Vision || [];
-    Mision = data?.Mision || [];
-    Objetivos = data?.Objetivos || [];
-    Valores = data?.Valores || [];
     Evento = data?.Evento || [];
 
     // Procesar infografía
@@ -71,6 +62,19 @@ try {
     } else if (data?.Infografia?.data?.attributes?.url) {
         Infografia = {
             url: `${import.meta.env.PUBLIC_STRAPI_URL}${data.Infografia.data.attributes.url}`
+        };
+    }
+
+    // Procesar imagen de Misión / Visión / Objetivo
+    if (data?.Mision_Vision_Objeitvo?.url) {
+        MisionVisionObjetivo = {
+            url: data.Mision_Vision_Objeitvo.url.startsWith('http')
+                ? data.Mision_Vision_Objeitvo.url
+                : `${import.meta.env.PUBLIC_STRAPI_URL}${data.Mision_Vision_Objeitvo.url}`
+        };
+    } else if (data?.Mision_Vision_Objeitvo?.data?.attributes?.url) {
+        MisionVisionObjetivo = {
+            url: `${import.meta.env.PUBLIC_STRAPI_URL}${data.Mision_Vision_Objeitvo.data.attributes.url}`
         };
     }
 
@@ -146,12 +150,9 @@ try {
     console.log("✅ Datos procesados:");
     console.log("- Título:", Titulo);
     console.log("- Historia:", Historia?.length || 0);
-    console.log("- Visión:", Vision?.length || 0);
-    console.log("- Misión:", Mision?.length || 0);
-    console.log("- Objetivos:", Objetivos?.length || 0);
-    console.log("- Valores:", Valores?.length || 0);
     console.log("- Eventos:", Evento?.length || 0);
     console.log("- Infografía:", !!Infografia);
+    console.log("- Misión / Visión / Objetivo:", !!MisionVisionObjetivo);
     console.log("- Miembros:", Miembros?.length || 0);
     console.log("🔍 Miembros procesados:", Miembros.map(m => ({ nombre: m.Nombres, puesto: m.puesto })));
     console.log("- Equipo Técnico:", EquipoTecnicos?.length || 0);
@@ -219,51 +220,18 @@ try {
 
         <section class="py-12 md:py-16 bg-background">
             <div class="mx-auto max-w-7xl px-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="rounded-lg border border-neutral-200 p-6 bg-white dark:bg-muted">
-                        <h2 class="text-2xl font-semibold mb-4">Visión</h2>
-                        {getBlockTexts(Vision).length > 0 ? (
-                            getBlockTexts(Vision).map((text: string) => (
-                                <p class="text-sm leading-relaxed mb-3 last:mb-0">{text}</p>
-                            ))
-                        ) : (
-                            <p class="text-sm leading-relaxed text-gray-600">Sin contenido de visión.</p>
-                        )}
-                    </div>
-
-                    <div class="rounded-lg border border-neutral-200 p-6 bg-white dark:bg-muted">
-                        <h2 class="text-2xl font-semibold mb-4">Misión</h2>
-                        {getBlockTexts(Mision).length > 0 ? (
-                            getBlockTexts(Mision).map((text: string) => (
-                                <p class="text-sm leading-relaxed mb-3 last:mb-0">{text}</p>
-                            ))
-                        ) : (
-                            <p class="text-sm leading-relaxed text-gray-600">Sin contenido de misión.</p>
-                        )}
-                    </div>
-
-                    <div class="rounded-lg border border-neutral-200 p-6 bg-white dark:bg-muted">
-                        <h2 class="text-2xl font-semibold mb-4">Objetivos</h2>
-                        {getBlockTexts(Objetivos).length > 0 ? (
-                            getBlockTexts(Objetivos).map((text: string) => (
-                                <p class="text-sm leading-relaxed mb-3 last:mb-0">{text}</p>
-                            ))
-                        ) : (
-                            <p class="text-sm leading-relaxed text-gray-600">Sin contenido de objetivos.</p>
-                        )}
-                    </div>
-
-                    <div class="rounded-lg border border-neutral-200 p-6 bg-white dark:bg-muted">
-                        <h2 class="text-2xl font-semibold mb-4">Valores</h2>
-                        {getBlockTexts(Valores).length > 0 ? (
-                            getBlockTexts(Valores).map((text: string) => (
-                                <p class="text-sm leading-relaxed mb-3 last:mb-0">{text}</p>
-                            ))
-                        ) : (
-                            <p class="text-sm leading-relaxed text-gray-600">Sin contenido de valores.</p>
-                        )}
-                    </div>
-                </div>
+                {MisionVisionObjetivo ? (
+                    <img
+                        src={MisionVisionObjetivo.url}
+                        alt="Misión, Visión y Objetivo"
+                        class="rounded-md object-cover w-full"
+                        loading="lazy"
+                    />
+                ) : (
+                    <p class="text-sm leading-relaxed text-gray-600 text-center">
+                        No hay imagen de Misión, Visión y Objetivo disponible.
+                    </p>
+                )}
             </div>
         </section>
 
@@ -289,7 +257,7 @@ try {
                                             <img
                                                 src={miembro.Portada.url}
                                                 alt={`${miembro.Nombres} ${miembro.Apellidos}`}
-                                                class="h-full w-full object-cover object-center"
+                                                class="h-full w-full object-cover object-top"
                                                 loading="lazy"
                                             />
                                         ) : (
@@ -333,7 +301,7 @@ try {
                                             <img
                                                 src={miembro.Portada.url}
                                                 alt={`${miembro.Nombre} ${miembro.Apellidos}`}
-                                                class="h-full w-full object-cover object-center"
+                                                class="h-full w-full object-cover object-top"
                                                 loading="lazy"
                                             />
                                         ) : (
