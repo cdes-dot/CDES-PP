@@ -43,7 +43,13 @@ export default function LogosSection() {
           <div className="relative py-6 md:w-[calc(100%-11rem)]">
             <InfiniteSlider speedOnHover={20} speed={40} gap={112}>
               {logos.map((logo: any) => (
-                <div className="flex" key={logo.Url}>
+                <a
+                  href={logo.Url}
+                  key={logo.Url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex hover:opacity-80 transition-opacity"
+                >
                   <img
                     className="mx-auto size-8 w-fit dark:invert"
                     src={logo.Logo.url}
@@ -51,7 +57,7 @@ export default function LogosSection() {
                     height="40"
                     width="auto"
                   />
-                </div>
+                </a>
               ))}
             </InfiniteSlider>
 
