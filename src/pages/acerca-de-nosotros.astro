@@ -8,7 +8,10 @@ let Titulo = "";
 let Historia: any[] = [];
 let Evento: any[] = [];
 let Infografia: any = null;
-let MisionVisionObjetivo: any = null;
+let Mision: any = null;
+let Vision: any = null;
+let Valores: any = null;
+let Objetivos: any = null;
 let Miembros: any[] = [];
 let EquipoTecnicos: any[] = [];
 
@@ -32,7 +35,10 @@ try {
         "&populate[Miembros][populate][institucion]=true" +
         "&populate[equipo_tecnicos][populate][Portada]=true" +
         "&populate[Infografia]=true" +
-        "&populate[Mision_Vision_Objeitvo]=true" +
+        "&populate[Mision]=true" +
+        "&populate[Vision]=true" +
+        "&populate[Valores]=true" +
+        "&populate[Objetivos]=true" +
         "&populate[Evento]=true"
     );
     
@@ -40,7 +46,10 @@ try {
         keys: Object.keys(data || {}),
         Titulo: data?.Titulo,
         Historia: !!data?.Historia,
-        Mision_Vision_Objeitvo: !!data?.Mision_Vision_Objeitvo,
+        Mision: !!data?.Mision,
+        Vision: !!data?.Vision,
+        Valores: !!data?.Valores,
+        Objetivos: !!data?.Objetivos,
         Evento: !!data?.Evento,
         Infografia: !!data?.Infografia,
         Miembros: !!data?.Miembros,
@@ -65,16 +74,55 @@ try {
         };
     }
 
-    // Procesar imagen de Misión / Visión / Objetivo
-    if (data?.Mision_Vision_Objeitvo?.url) {
-        MisionVisionObjetivo = {
-            url: data.Mision_Vision_Objeitvo.url.startsWith('http')
-                ? data.Mision_Vision_Objeitvo.url
-                : `${import.meta.env.PUBLIC_STRAPI_URL}${data.Mision_Vision_Objeitvo.url}`
+    // Procesar imagen de Misión
+    if (data?.Mision?.url) {
+        Mision = {
+            url: data.Mision.url.startsWith('http')
+                ? data.Mision.url
+                : `${import.meta.env.PUBLIC_STRAPI_URL}${data.Mision.url}`
         };
-    } else if (data?.Mision_Vision_Objeitvo?.data?.attributes?.url) {
-        MisionVisionObjetivo = {
-            url: `${import.meta.env.PUBLIC_STRAPI_URL}${data.Mision_Vision_Objeitvo.data.attributes.url}`
+    } else if (data?.Mision?.data?.attributes?.url) {
+        Mision = {
+            url: `${import.meta.env.PUBLIC_STRAPI_URL}${data.Mision.data.attributes.url}`
+        };
+    }
+
+    // Procesar imagen de Visión
+    if (data?.Vision?.url) {
+        Vision = {
+            url: data.Vision.url.startsWith('http')
+                ? data.Vision.url
+                : `${import.meta.env.PUBLIC_STRAPI_URL}${data.Vision.url}`
+        };
+    } else if (data?.Vision?.data?.attributes?.url) {
+        Vision = {
+            url: `${import.meta.env.PUBLIC_STRAPI_URL}${data.Vision.data.attributes.url}`
+        };
+    }
+
+    // Procesar imagen de Valores
+    if (data?.Valores?.url) {
+        Valores = {
+            url: data.Valores.url.startsWith('http')
+                ? data.Valores.url
+                : `${import.meta.env.PUBLIC_STRAPI_URL}${data.Valores.url}`
+        };
+    } else if (data?.Valores?.data?.attributes?.url) {
+        Valores = {
+            url: `${import.meta.env.PUBLIC_STRAPI_URL}${data.Valores.data.attributes.url}`
+        };
+    }
+
+    // Procesar imagen de Objetivos
+    if (data?.Objetivos?.url) {
+        Objetivos = {
+            url: data.Objetivos.url.startsWith('http')
+                ? data.Objetivos.url
+                : `${import.meta.env.PUBLIC_STRAPI_URL}${data.Objetivos.url}`
+        };
+    } else if (data?.Objetivos?.data?.attributes?.url) {
+        Objetivos = {
+            url: `${import.meta.env.PUBLIC_STRAPI_URL}${data.Objetivos.data.attributes.url}`
         };
     }
 
@@ -152,7 +200,10 @@ try {
     console.log("- Historia:", Historia?.length || 0);
     console.log("- Eventos:", Evento?.length || 0);
     console.log("- Infografía:", !!Infografia);
-    console.log("- Misión / Visión / Objetivo:", !!MisionVisionObjetivo);
+    console.log("- Misión:", !!Mision);
+    console.log("- Visión:", !!Vision);
+    console.log("- Valores:", !!Valores);
+    console.log("- Objetivos:", !!Objetivos);
     console.log("- Miembros:", Miembros?.length || 0);
     console.log("🔍 Miembros procesados:", Miembros.map(m => ({ nombre: m.Nombres, puesto: m.puesto })));
     console.log("- Equipo Técnico:", EquipoTecnicos?.length || 0);
@@ -220,18 +271,80 @@ try {
 
         <section class="py-12 md:py-16 bg-background">
             <div class="mx-auto max-w-7xl px-6">
-                {MisionVisionObjetivo ? (
-                    <img
-                        src={MisionVisionObjetivo.url}
-                        alt="Misión, Visión y Objetivo"
-                        class="rounded-md object-cover w-full"
-                        loading="lazy"
-                    />
-                ) : (
-                    <p class="text-sm leading-relaxed text-gray-600 text-center">
-                        No hay imagen de Misión, Visión y Objetivo disponible.
-                    </p>
-                )}
+                <h2 class="text-3xl font-semibold text-center mb-8">Misión, Visión, Valores y Objetivos</h2>
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+                    {Mision ? (
+                        <div>
+                            <h3 class="text-lg font-semibold text-center mb-4">Misión</h3>
+                            <img
+                                src={Mision.url}
+                                alt="Misión"
+                                class="rounded-md object-cover w-full"
+                                loading="lazy"
+                            />
+                        </div>
+                    ) : (
+                        <div class="rounded-md bg-gray-100 dark:bg-gray-800 p-8 flex items-center justify-center">
+                            <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400 text-center">
+                                No hay imagen de Misión disponible.
+                            </p>
+                        </div>
+                    )}
+
+                    {Vision ? (
+                        <div>
+                            <h3 class="text-lg font-semibold text-center mb-4">Visión</h3>
+                            <img
+                                src={Vision.url}
+                                alt="Visión"
+                                class="rounded-md object-cover w-full"
+                                loading="lazy"
+                            />
+                        </div>
+                    ) : (
+                        <div class="rounded-md bg-gray-100 dark:bg-gray-800 p-8 flex items-center justify-center">
+                            <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400 text-center">
+                                No hay imagen de Visión disponible.
+                            </p>
+                        </div>
+                    )}
+
+                    {Valores ? (
+                        <div>
+                            <h3 class="text-lg font-semibold text-center mb-4">Valores</h3>
+                            <img
+                                src={Valores.url}
+                                alt="Valores"
+                                class="rounded-md object-cover w-full"
+                                loading="lazy"
+                            />
+                        </div>
+                    ) : (
+                        <div class="rounded-md bg-gray-100 dark:bg-gray-800 p-8 flex items-center justify-center">
+                            <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400 text-center">
+                                No hay imagen de Valores disponible.
+                            </p>
+                        </div>
+                    )}
+
+                    {Objetivos ? (
+                        <div>
+                            <h3 class="text-lg font-semibold text-center mb-4">Objetivos</h3>
+                            <img
+                                src={Objetivos.url}
+                                alt="Objetivos"
+                                class="rounded-md object-cover w-full"
+                                loading="lazy"
+                            />
+                        </div>
+                    ) : (
+                        <div class="rounded-md bg-gray-100 dark:bg-gray-800 p-8 flex items-center justify-center">
+                            <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400 text-center">
+                                No hay imagen de Objetivos disponible.
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
         </section>
 
