@@ -271,8 +271,7 @@ try {
 
         <section class="py-12 md:py-16 bg-background">
             <div class="mx-auto max-w-7xl px-6">
-                <h2 class="text-3xl font-semibold text-center mb-8">Misión, Visión, Valores y Objetivos</h2>
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     {Mision ? (
                         <div>
                             <h3 class="text-lg font-semibold text-center mb-4">Misión</h3>
@@ -310,7 +309,7 @@ try {
                     )}
 
                     {Valores ? (
-                        <div>
+                        <div class="col-span-full">
                             <h3 class="text-lg font-semibold text-center mb-4">Valores</h3>
                             <img
                                 src={Valores.url}
@@ -320,7 +319,7 @@ try {
                             />
                         </div>
                     ) : (
-                        <div class="rounded-md bg-gray-100 dark:bg-gray-800 p-8 flex items-center justify-center">
+                        <div class="col-span-full rounded-md bg-gray-100 dark:bg-gray-800 p-8 flex items-center justify-center">
                             <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400 text-center">
                                 No hay imagen de Valores disponible.
                             </p>
@@ -328,7 +327,7 @@ try {
                     )}
 
                     {Objetivos ? (
-                        <div>
+                        <div class="col-span-full">
                             <h3 class="text-lg font-semibold text-center mb-4">Objetivos</h3>
                             <img
                                 src={Objetivos.url}
@@ -338,7 +337,7 @@ try {
                             />
                         </div>
                     ) : (
-                        <div class="rounded-md bg-gray-100 dark:bg-gray-800 p-8 flex items-center justify-center">
+                        <div class="col-span-full rounded-md bg-gray-100 dark:bg-gray-800 p-8 flex items-center justify-center">
                             <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400 text-center">
                                 No hay imagen de Objetivos disponible.
                             </p>
