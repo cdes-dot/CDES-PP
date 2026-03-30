@@ -106,7 +106,7 @@ const logoUrl = Logo?.url || "/default-logo.png";
                     const utterance = new SpeechSynthesisUtterance(
                         welcomeMessage,
                     );
-                    utterance.lang = "es-ES";
+                    utterance.lang = "es-MX";
                     speechSynthesis.speak(utterance);
                     sessionStorage.setItem("hasBeenWelcomed", "true");
                 }
