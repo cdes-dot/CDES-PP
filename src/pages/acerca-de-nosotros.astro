@@ -155,7 +155,8 @@ try {
                         url: `${import.meta.env.PUBLIC_STRAPI_URL}${item.attributes.Portada.data.attributes.url}`
                     } : null,
                     institucion: item.attributes?.institucion?.data ? {
-                        Nombre: item.attributes.institucion.data.attributes.Nombre
+                        Nombre: item.attributes.institucion.data.attributes.Nombre,
+                        Url: item.attributes.institucion.data.attributes.Url
                     } : null,
                     puesto: item.attributes?.puesto || item.attributes?.Puesto || null
                 };
@@ -361,7 +362,7 @@ try {
                     <div class="mb-16">
                         <h2 class="text-3xl font-semibold text-center mb-8">Junta Directiva</h2>
 
-                        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="members-grid grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                             {Miembros.map((miembro: any) => (
                                 <div class="bg-white dark:bg-muted rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                                     <div class="w-full aspect-square overflow-hidden bg-gray-200 dark:bg-gray-700">
@@ -385,12 +386,23 @@ try {
                                             {miembro.Nombres} {miembro.Apellidos}
                                         </h3>
                                         {miembro.institucion && (
-                                            <p class="text-sm text-gray-600 dark:text-neutral-400 mb-2">
-                                                {miembro.institucion.Nombre}
-                                            </p>
+                                            miembro.institucion.Url ? (
+                                                <a
+                                                    href={miembro.institucion.Url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="text-sm text-blue-600 dark:text-blue-400 mb-2 block hover:underline"
+                                                >
+                                                    {miembro.institucion.Nombre}
+                                                </a>
+                                            ) : (
+                                                <p class="text-sm text-gray-600 dark:text-neutral-400 mb-2">
+                                                    {miembro.institucion.Nombre}
+                                                </p>
+                                            )
                                         )}
                                         {miembro.puesto && (
-                                            <span class="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 text-xs px-2 py-1 rounded">
+                                            <span class="block w-fit bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 text-xs px-2 py-1 rounded">
                                                 {miembro.puesto}
                                             </span>
                                         )}
@@ -405,7 +417,7 @@ try {
                 {EquipoTecnicos && EquipoTecnicos.length > 0 && (
                     <div>
                         <h2 class="text-3xl font-semibold text-center mb-8">Equipo Técnico</h2>
-                        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="members-grid grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                             {EquipoTecnicos.map((miembro: any) => (
                                 <div class="bg-white dark:bg-muted rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                                     <div class="w-full aspect-square overflow-hidden bg-gray-200 dark:bg-gray-700">
@@ -448,4 +460,21 @@ try {
         </section>
     </div>
 </Layout>
+
+<style>
+    @media (min-width: 640px) and (max-width: 1023px) {
+        .members-grid > :last-child:nth-child(2n + 1) {
+            grid-column: 1 / -1;
+            justify-self: center;
+            width: 100%;
+            max-width: 24rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .members-grid > :last-child:nth-child(3n + 1) {
+            grid-column: 2;
+        }
+    }
+</style>
 
