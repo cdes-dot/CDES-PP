@@ -14,6 +14,18 @@ const itemsPerPage = 9; // Número de noticias por página
 
 const [data,meta] = await getData(`articulos?populate=*&pagination[page]=${currentPage}&pagination[pageSize]=9&sort=Creacion:desc`, true);
 const {Encabezado } = await getData("Noticia?populate[Encabezado][populate][articulos][populate]=*")
+
+const buildImageUrl = (portada: any) => {
+    const rawUrl =
+        portada?.url ||
+        portada?.data?.attributes?.url ||
+        portada?.data?.[0]?.attributes?.url ||
+        "";
+
+    if (!rawUrl) return "/placeholder-news.jpg";
+    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) return rawUrl;
+    return `${import.meta.env.PUBLIC_STRAPI_URL}${rawUrl}`;
+};
 // Calcular paginación
 const totalItems = data.length;
 const totalPages = Math.ceil(meta.pagination.total / itemsPerPage);
@@ -83,20 +95,18 @@ const paginationItems = getPaginationItems();
             <!-- Lista vertical de noticias -->
             <div class="mt-10 space-y-8 mb-12 grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 ">
                 {currentNews.map((noticia: any, index: number) => (
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 md:max-h-[316px] min-h-[316px]">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
-                            <div class="md:col-span-1 md:hidden">
-                                <div class="aspect-video md:aspect-square overflow-hidden h-full">
-                                    <img
-                                        src={noticia.Portada?.url}
-                                        alt={noticia.Titulo}
-                                        class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                    />
-                                </div>
-                            </div>
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full">
+                        <a href={`/noticias/${noticia.documentId}`} class="block aspect-video overflow-hidden">
+                            <img
+                                src={buildImageUrl(noticia.Portada)}
+                                alt={noticia.Titulo}
+                                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                            />
+                        </a>
 
-                            <!-- Contenido -->
-                            <div class="md:col-span-2 p-6">
+                        <!-- Contenido -->
+                        <div class="p-6">
                                 <!-- Badge de posición -->
                                 <div class="flex items-center mb-3">
                                     <div class="ml-auto flex items-center space-x-1 text-xs text-muted-foreground">
@@ -106,7 +116,7 @@ const paginationItems = getPaginationItems();
                                 </div>
 
                                 <!-- Título -->
-                                <h2 class="text-2xl font-semibold mb-3 line-clamp-2 font-noto">
+                                <h2 class="text-2xl font-semibold mb-3 font-noto break-words leading-snug">
                                     <a
                                         href={`/noticias/${noticia.documentId}`}
                                         class="hover:text-primary transition-colors"
@@ -138,7 +148,6 @@ const paginationItems = getPaginationItems();
                                         Leer más →
                                     </a>
                                 </div>
-                            </div>
                         </div>
                     </Card>
                 ))}

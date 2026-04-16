@@ -1,0 +1,207 @@
+---
+export const prerender = false;
+import Layout from "@/layouts/Layout.astro";
+import { getData } from "lib/fetch";
+
+type Institucion = {
+  id: number;
+  Nombre: string;
+  Url?: string;
+  mediaUrl?: string;
+};
+
+const toAbsoluteUrl = (url?: string) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${import.meta.env.PUBLIC_STRAPI_URL}${url}`;
+};
+
+const extractMediaUrl = (media: any): string => {
+  if (!media) return "";
+
+  // Strapi 5 shape: { id, url }
+  if (typeof media.url === "string") {
+    return toAbsoluteUrl(media.url);
+  }
+
+  // Strapi 4 shape: { data: { attributes: { url } } }
+  if (typeof media?.data?.attributes?.url === "string") {
+    return toAbsoluteUrl(media.data.attributes.url);
+  }
+
+  // Strapi 4 (single media with array fallback)
+  if (typeof media?.data?.[0]?.attributes?.url === "string") {
+    return toAbsoluteUrl(media.data[0].attributes.url);
+  }
+
+  return "";
+};
+
+let instituciones: Institucion[] = [];
+const pageSize = 20;
+
+const requestedPage = Number(Astro.url.searchParams.get("page") || "1");
+const currentPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+
+let pageCount = 1;
+let totalInstituciones = 0;
+
+const createPageHref = (page: number) => {
+  return page <= 1 ? "/mienbros" : `/mienbros?page=${page}`;
+};
+
+try {
+  const [data, meta] = await getData(
+    `institucions?populate=Media&sort=Nombre:asc&pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`,
+    true,
+  );
+
+  if (Array.isArray(data)) {
+    instituciones = data.map((item: any) => ({
+      id: item.id,
+      Nombre: item.Nombre || item.attributes?.Nombre || "Anonimo",
+      Url: item.Url || item.attributes?.Url || "",
+      mediaUrl: extractMediaUrl(item.Media || item.attributes?.Media),
+    })).sort((left, right) => left.Nombre.localeCompare(right.Nombre, "es", { sensitivity: "base" }));
+  }
+
+  totalInstituciones = meta?.pagination?.total || instituciones.length;
+  pageCount = Math.max(1, meta?.pagination?.pageCount || 1);
+} catch (error) {
+  console.error("Error cargando instituciones:", error);
+}
+
+if (pageCount > 1 && currentPage > pageCount) {
+  return Astro.redirect(createPageHref(pageCount));
+}
+
+const hasPrevPage = currentPage > 1;
+const hasNextPage = currentPage < pageCount;
+
+const maxVisiblePages = 7;
+let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+let endPage = Math.min(pageCount, startPage + maxVisiblePages - 1);
+
+if (endPage - startPage + 1 < maxVisiblePages) {
+  startPage = Math.max(1, endPage - maxVisiblePages + 1);
+}
+
+const visiblePages = Array.from(
+  { length: endPage - startPage + 1 },
+  (_, index) => startPage + index,
+);
+---
+
+<Layout>
+  <main class="min-h-screen bg-background">
+    <section class="bg-muted py-20">
+      <div class="mx-auto max-w-7xl px-6 text-center">
+        <h1 class="text-4xl font-semibold md:text-5xl">Asamble CDES</h1>
+        <p class="mt-4 text-muted-foreground">
+          Instituciones participantes del CDES.
+        </p>
+      </div>
+    </section>
+
+    <section class="py-12 md:py-16">
+      <div class="mx-auto max-w-7xl px-6">
+        {instituciones.length > 0 ? (
+          <>
+            <div class="mb-6 text-sm text-muted-foreground">
+              Mostrando pagina {currentPage} de {pageCount} ({totalInstituciones} instituciones)
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {instituciones.map((institucion) => (
+                <article class="group flex h-full flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                  <div class="aspect-video w-full overflow-hidden bg-muted">
+                    {institucion.mediaUrl ? (
+                      <img
+                        src={institucion.mediaUrl}
+                        alt={`Portada de ${institucion.Nombre}`}
+                        class="h-full w-full object-contain object-center"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div class="flex h-full items-center justify-center text-sm text-muted-foreground">
+                        Sin portada
+                      </div>
+                    )}
+                  </div>
+
+                  <div class="flex flex-1 flex-col p-4">
+                    <h2 class="text-lg font-semibold break-words leading-snug">{institucion.Nombre}</h2>
+
+                    {institucion.Url ? (
+                      <a
+                        href={institucion.Url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="mt-4 inline-flex w-fit items-center rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:opacity-90"
+                      >
+                        Visitar sitio
+                      </a>
+                    ) : (
+                      <p class="mt-4 text-sm text-muted-foreground">Sin URL disponible</p>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {pageCount > 1 && (
+              <nav class="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Paginacion de instituciones">
+                <a
+                  href={hasPrevPage ? createPageHref(currentPage - 1) : "#"}
+                  class:list={[
+                    "rounded-md border px-3 py-2 text-sm transition",
+                    hasPrevPage
+                      ? "bg-background hover:bg-muted"
+                      : "pointer-events-none opacity-50",
+                  ]}
+                  aria-disabled={!hasPrevPage}
+                >
+                  Anterior
+                </a>
+
+                {visiblePages.map((page) => (
+                  <a
+                    href={createPageHref(page)}
+                    class:list={[
+                      "rounded-md border px-3 py-2 text-sm transition",
+                      page === currentPage
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-background hover:bg-muted",
+                    ]}
+                    aria-current={page === currentPage ? "page" : undefined}
+                  >
+                    {page}
+                  </a>
+                ))}
+
+                <a
+                  href={hasNextPage ? createPageHref(currentPage + 1) : "#"}
+                  class:list={[
+                    "rounded-md border px-3 py-2 text-sm transition",
+                    hasNextPage
+                      ? "bg-background hover:bg-muted"
+                      : "pointer-events-none opacity-50",
+                  ]}
+                  aria-disabled={!hasNextPage}
+                >
+                  Siguiente
+                </a>
+              </nav>
+            )}
+          </>
+        ) : (
+          <div class="rounded-xl border bg-card p-10 text-center">
+            <p class="text-muted-foreground">
+              Aun no hay instituciones publicadas.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  </main>
+</Layout>
