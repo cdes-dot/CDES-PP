@@ -259,6 +259,10 @@ export default function BibliotecaSearch() {
         await Promise.all(
           docs.map(async (doc) => {
             try {
+              console.log(`📥 Cargando URLs para documento: "${doc.title}" (ID: ${doc.id})`);
+              console.log(`   storage_path: "${doc.storage_path}"`);
+              console.log(`   cover_image_path: "${doc.cover_image_path}"`);
+              
               const coverUrl = doc.cover_image_path
                 ? await fetchFileUrlWrapper(doc.cover_image_path)
                 : "/placeholder.jpg";
@@ -266,10 +270,12 @@ export default function BibliotecaSearch() {
               if (useMeilisearch) {
                 const pdfUrl = await fetchFileUrlWrapper(doc.storage_path);
                 urls[doc.id] = { coverUrl, pdfUrl };
+                console.log(`✅ URLs cargadas para ${doc.id}`);
               } else {
                 urls[doc.id] = { coverUrl, pdfUrl: "#" };
               }
-            } catch {
+            } catch (error: any) {
+              console.error(`❌ Error cargando URLs para documento "${doc.title}":`, error);
               urls[doc.id] = { coverUrl: "/placeholder.jpg", pdfUrl: "#" };
             }
           })
@@ -311,16 +317,32 @@ export default function BibliotecaSearch() {
   };
 
   const handleDownload = async (doc: Documento) => {
+    console.log(`\n📄 Intentando descargar documento: "${doc.title}"`);
+    console.log(`   ID: ${doc.id}`);
+    console.log(`   Ruta de almacenamiento: "${doc.storage_path}"`);
+    console.log(`   Usando Meilisearch: ${useMeilisearch}`);
+
     if (!useMeilisearch) {
-      if (!doc.storage_path) {
-        alert("Este documento no tiene un archivo adjunto.");
+      if (!doc.storage_path || doc.storage_path.trim() === "") {
+        console.error(`❌ storage_path vacío para el documento: "${doc.title}"`);
+        alert(`❌ Error: Este documento no tiene una ruta de archivo. storage_path no está configurado.`);
         return;
       }
       try {
+        console.log(`🔄 Obteniendo URL de descarga desde Firebase Storage...`);
         const url = await fetchFileUrlWrapper(doc.storage_path);
+        
+        if (url === "/placeholder.jpg") {
+          console.error(`❌ No se pudo obtener una URL válida para: "${doc.storage_path}"`);
+          alert(`❌ Error 404: El archivo no se encontró en Firebase Storage.\n\nRuta intentada: "${doc.storage_path}"\n\nVerifica que:\n- El archivo exista en Firebase Storage\n- La ruta sea correcta\n- El archivo no haya sido eliminado`);
+          return;
+        }
+
+        console.log(`✅ URL obtenida exitosamente, abriendo...`);
         window.open(url, '_blank');
-      } catch {
-        alert("No se pudo obtener el enlace de descarga.");
+      } catch (error: any) {
+        console.error(`❌ Error al descargar el documento:`, error);
+        alert(`❌ Error al descargar: ${error?.message || 'No se pudo obtener el archivo. Revisa la consola (F12) para más detalles.'}`);
       }
     }
   };
@@ -509,9 +531,19 @@ export default function BibliotecaSearch() {
 // Updated to use only one argument as per the function definition
 const fetchFileUrlWrapper = async (path: string) => {
   try {
-    return await fetchFileUrl(path);
-  } catch (error) {
-    console.error("Error fetching file URL:", error);
-    return "/placeholder.jpg"; // Fallback URL
+    console.log(`🔗 fetchFileUrlWrapper: Llamando fetchFileUrl con ruta: "${path}"`);
+    const url = await fetchFileUrl(path);
+    
+    if (url === "/placeholder.jpg") {
+      console.warn(`⚠️ fetchFileUrlWrapper: Retornó placeholder (error al obtener URL)`);
+    } else {
+      console.log(`✅ fetchFileUrlWrapper: URL obtenida correctamente`);
+    }
+    
+    return url;
+  } catch (error: any) {
+    console.error(`❌ fetchFileUrlWrapper: Error al obtener URL para "${path}":`, error);
+    console.error(`   Error message: ${error?.message}`);
+    throw error; // Re-lanzar el error para que handleDownload lo capture
   }
 };
